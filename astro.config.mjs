@@ -7,8 +7,6 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
   },
-  site: "https://hermit403.github.io",
-  base: "/openahu-website",
   compressHTML: true,
   server: {
     host: true,
