@@ -1,0 +1,31 @@
+---
+import { GitHubLogoIcon, EnvelopeClosedIcon } from "@radix-ui/react-icons";
+
+const socialLinks = [
+  { name: "GitHub", href: "https://github.com/openahu", icon: GitHubLogoIcon },
+  {
+    name: "Email",
+    href: "mailto:contact@openahu.org",
+    icon: EnvelopeClosedIcon,
+  },
+];
+---
+
+<div class="flex space-x-4">
+  {
+    socialLinks.map((link) => {
+      const Icon = link.icon;
+      return (
+        <a
+          href={link.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-muted-foreground hover:text-foreground transition-colors"
+          aria-label={link.name}
+        >
+          <Icon className="w-6 h-6" />
+        </a>
+      );
+    })
+  }
+</div>

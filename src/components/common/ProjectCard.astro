@@ -1,0 +1,67 @@
+---
+import { type CollectionEntry } from "astro:content";
+import Button from "../ui/Button.astro";
+import { GitHubLogoIcon } from "@radix-ui/react-icons";
+import LiquidContainer from "../ui/LiquidContainer";
+
+interface Props {
+  project: CollectionEntry<"projects">;
+}
+
+const { project } = Astro.props;
+const { title, desc, techstack, links } = project.data;
+const slug = project.data.slug || project.id;
+const skillIconsUrl = `https://skillicons.dev/icons?i=${techstack.map((t) => t.toLowerCase().replace(/\s+/g, "")).join(",")}`;
+---
+
+<div
+  class="group relative rounded-xl font-sans transition-transform duration-300 hover:-translate-y-1 w-full max-w-sm"
+>
+  <LiquidContainer
+    client:visible
+    fill
+    className="w-full rounded-xl"
+    radius={12}
+  >
+    <div class="flex flex-col gap-4 relative z-10">
+      <div class="flex items-center justify-between">
+        <h3 class="text-2xl font-bold tracking-tight">{title}</h3>
+        {
+          links.find((l) => l.name === "GitHub") && (
+            <a
+              href={links.find((l) => l.name === "GitHub")?.url}
+              target="_blank"
+              class="text-muted-foreground hover:text-foreground z-10 relative transition-colors"
+            >
+              <GitHubLogoIcon className="h-5 w-5" />
+            </a>
+          )
+        }
+      </div>
+
+      <p class="text-muted-foreground line-clamp-3 min-h-[3rem]">
+        {desc}
+      </p>
+
+      <div class="mt-2 h-10">
+        <img
+          src={skillIconsUrl}
+          alt="Tech Stack"
+          class="h-full object-contain object-left"
+          loading="lazy"
+        />
+      </div>
+
+      <div class="mt-4 flex gap-2 pt-2">
+        <Button
+          variant="outline"
+          size="sm"
+          class="w-full z-10 relative"
+          href={`/projects/${slug}`}
+        >
+          查看详情
+        </Button>
+      </div>
+    </div>
+  </LiquidContainer>
+</div>

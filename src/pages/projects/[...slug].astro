@@ -1,0 +1,73 @@
+---
+import { getCollection, render } from "astro:content";
+import Layout from "../../layouts/Layout.astro";
+import Button from "../../components/ui/Button.astro";
+import { ArrowLeftIcon } from "@radix-ui/react-icons";
+
+export async function getStaticPaths() {
+  const projects = await getCollection("projects");
+  return projects.map((project) => ({
+    params: { slug: project.data.slug || project.id },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+const { title, desc, techstack, screenshots, links } = project.data;
+const { Content } = await render(project);
+
+const skillIconsUrl = `https://skillicons.dev/icons?i=${techstack.map((t) => t.toLowerCase().replace(/\s+/g, "")).join(",")}`;
+---
+
+<Layout title={`${title} - OpenAHU Project`}>
+  <div class="container mx-auto px-4 py-16 max-w-4xl">
+    <Button variant="ghost" size="sm" href="/" class="mb-8">
+      <ArrowLeftIcon className="mr-2 h-4 w-4" /> 返回首页
+    </Button>
+
+    <div class="flex flex-col gap-8">
+      <div class="space-y-4">
+        <h1 class="text-4xl font-extrabold tracking-tight lg:text-5xl">
+          {title}
+        </h1>
+        <p class="text-xl text-muted-foreground">{desc}</p>
+
+        <div class="flex items-center gap-4 pt-4">
+          <img src={skillIconsUrl} alt="Tech Stack" height="40" class="h-10" />
+        </div>
+
+        <div class="flex gap-4 pt-4">
+          {
+            links.map((link) => (
+              <Button
+                variant={link.name === "Website" ? "default" : "outline"}
+                href={link.url}
+                target="_blank"
+              >
+                {link.name}
+              </Button>
+            ))
+          }
+        </div>
+      </div>
+
+      {
+        screenshots && screenshots.length > 0 && (
+          <div class="grid gap-4">
+            {screenshots.map((shot) => (
+              <img
+                src={shot}
+                alt={`Screenshot of ${title}`}
+                class="rounded-lg border border-border shadow-sm w-full"
+              />
+            ))}
+          </div>
+        )
+      }
+
+      <div class="prose prose-neutral dark:prose-invert max-w-none">
+        <Content />
+      </div>
+    </div>
+  </div>
+</Layout>

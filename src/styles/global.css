@@ -1,0 +1,221 @@
+﻿@import "tailwindcss";
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary-new: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+}
+
+@layer base {
+  :root {
+    --background: #ffffff;
+    --foreground: #09090b;
+    --primary: #000000;
+    --primary-foreground: #ffffff;
+    --muted: #f4f4f5;
+    --muted-foreground: #71717a;
+    --border: #e4e4e7;
+  }
+
+  .dark {
+    --background: #09090b;
+    --foreground: #ffffff;
+    --primary: #ffffff;
+    --primary-foreground: #000000;
+    --muted: #27272a;
+    --muted-foreground: #a1a1aa;
+    --border: #27272a;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 1s ease-out forwards;
+}
+
+/* Liquid Glass Utilities */
+.glass-panel {
+  @apply bg-white/70 dark:bg-black/70 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-sm;
+}
+
+.glass-card {
+  @apply bg-white/40 dark:bg-zinc-900/40 backdrop-blur-md border border-white/40 dark:border-white/10 shadow-sm transition-all duration-300 hover:shadow-md hover:bg-white/50 dark:hover:bg-zinc-900/60;
+}
+
+/* Theme Toggle View Transition */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+  position: absolute;
+}
+
+/* Light Mode Active (Transiting from Dark to Light) */
+/* Old (Dark) should be on TOP and shrink */
+::view-transition-old(root) {
+  z-index: 9999;
+}
+::view-transition-new(root) {
+  z-index: 1;
+}
+
+/* Dark Mode Active (Transiting from Light to Dark) */
+/* New (Dark) should be on TOP and grow */
+.dark::view-transition-old(root) {
+  z-index: 1;
+}
+.dark::view-transition-new(root) {
+  z-index: 9999;
+}
+
+/* Global Styles */
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-feature-settings:
+    "rlig" 1,
+    "calt" 1;
+}
+
+/* Prevent text selection on interactive elements */
+button,
+a,
+nav,
+header,
+footer,
+[role="button"],
+svg,
+img {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Allow text selection in main content areas */
+main p,
+main h1,
+main h2,
+main h3,
+main h4,
+main h5,
+main h6,
+main li,
+main td,
+main th {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* liquid-glass-react integration: make it match site typography + layout */
+.liquid-surface {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.liquid-surface .glass {
+  gap: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+
+.dark .liquid-surface .glass {
+  border: none !important;
+  background: transparent !important;
+}
+
+/* The library wraps children with fixed white text + fixed font; revert to app defaults */
+.liquid-surface :where(.transition-all.duration-150.ease-in-out.text-white) {
+  color: inherit !important;
+  font: inherit !important;
+  text-shadow: none !important;
+}
+
+/* Baseline reset (Tailwind v4 does not guarantee body margin reset) */
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+/* Global mouse light (performance: CSS vars updated via rAF) */
+:root {
+  --mouse-x: 50vw;
+  --mouse-y: 20vh;
+}
+
+.global-mouse-light {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 200ms ease;
+  background: radial-gradient(
+    700px circle at var(--mouse-x) var(--mouse-y),
+    rgba(0, 0, 0, 0.06),
+    transparent 60%
+  );
+}
+
+.dark .global-mouse-light {
+  background: radial-gradient(
+    800px circle at var(--mouse-x) var(--mouse-y),
+    rgba(120, 190, 255, 0.1),
+    transparent 60%
+  );
+}
+
+.has-pointer .global-mouse-light {
+  opacity: 1;
+}
+
+/* Opt-in full-width glass surface.
+   IMPORTANT: LiquidGlass measures its own wrapper size for overlays; when the wrapper is full width,
+   we must make the internal .glass full width too, otherwise you get misaligned overlays ("ghost bars")
+   and layout drift due to the library's center transform. */
+.liquid-fill .glass {
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Minimalist scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #a1a1aa;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #71717a;
+}

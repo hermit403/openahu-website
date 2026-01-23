@@ -1,0 +1,40 @@
+---
+import Logo from "../common/Logo.astro";
+import Navigation from "./Navigation.astro";
+import ThemeToggle from "../common/ThemeToggle.astro";
+import { GitHubLogoIcon } from "@radix-ui/react-icons";
+import LiquidContainer from "../ui/LiquidContainer";
+---
+
+<header
+  class="sticky top-4 z-50 w-full mx-auto max-w-5xl mt-4 transition-all duration-300 px-4 md:px-0"
+>
+  <LiquidContainer
+    client:idle
+    variant="pill"
+    fill
+    className="h-12 rounded-2xl"
+    padding="0"
+  >
+    <div class="flex h-full w-full items-center justify-between px-6">
+      <div class="mr-4 flex flex-shrink-0">
+        <Logo />
+      </div>
+      <div class="flex flex-1 items-center justify-end space-x-4 min-w-0">
+        <Navigation />
+        <nav class="flex items-center space-x-1 flex-shrink-0 z-50 relative">
+          <a
+            href="https://github.com/OpenAHU"
+            target="_blank"
+            rel="noreferrer"
+            class="w-10 h-12 inline-flex items-center justify-center rounded-md hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+          >
+            <GitHubLogoIcon className="w-5 h-5" />
+            <span class="sr-only">GitHub</span>
+          </a>
+          <ThemeToggle />
+        </nav>
+      </div>
+    </div>
+  </LiquidContainer>
+</header>

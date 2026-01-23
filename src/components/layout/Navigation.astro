@@ -1,0 +1,19 @@
+---
+const navItems = [
+  { name: "首页", href: "/" },
+  { name: "关于", href: "/about" },
+];
+---
+
+<nav class="flex items-center space-x-6 text-sm font-medium">
+  {
+    navItems.map((item) => (
+      <a
+        href={item.href}
+        class="transition-colors hover:text-foreground/80 text-foreground/60"
+      >
+        {item.name}
+      </a>
+    ))
+  }
+</nav>

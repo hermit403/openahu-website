@@ -1,0 +1,54 @@
+---
+import Button from "../ui/Button.astro";
+
+interface Props {
+  title?: string;
+  description?: string;
+  cta?: { text: string; href: string };
+}
+
+const {
+  title = "OpenAHU",
+  description = "开放 · 创新 · 协作",
+  cta,
+} = Astro.props;
+---
+
+<section
+  class="container mx-auto grid min-h-[90vh] items-center gap-6 pb-20 pt-16 md:py-32"
+>
+  <div class="flex flex-col items-center gap-4 text-center">
+    <h1
+      class="animate-fade-in text-6xl font-extrabold leading-tight tracking-tighter md:text-8xl lg:text-9xl bg-clip-text text-transparent bg-gradient-to-r from-primary-new to-gray-600 dark:from-white dark:to-gray-400 drop-shadow-sm"
+    >
+      {title}
+    </h1>
+    <p
+      class="max-w-[750px] animate-fade-in text-lg text-muted-foreground sm:text-xl opacity-0"
+      style="animation-delay: 0.3s; animation-fill-mode: forwards;"
+    >
+      {description}
+    </p>
+  </div>
+  <div
+    class="flex justify-center gap-4 animate-fade-in opacity-0"
+    style="animation-delay: 0.6s; animation-fill-mode: forwards;"
+  >
+    {
+      cta && (
+        <Button size="lg" href={cta.href} class="gap-2">
+          {cta.text}
+        </Button>
+      )
+    }
+    <Button
+      variant="outline"
+      size="lg"
+      href="https://github.com/OpenAHU"
+      target="_blank"
+      rel="noreferrer"
+    >
+      GitHub
+    </Button>
+  </div>
+</section>
