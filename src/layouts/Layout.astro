@@ -21,67 +21,166 @@ const {
 ---
 
 <!doctype html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="description" content={description} />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="preload" as="image" href="/favicon.png" />
+    <link rel="dns-prefetch" href="//skillicons.dev" />
+    <link rel="preconnect" href="https://skillicons.dev" crossorigin />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
     <script is:inline>
-      // Theme initialization
+      const root = document.documentElement;
       const getThemePreference = () => {
-        if (
-          typeof localStorage !== "undefined" &&
-          localStorage.getItem("theme")
-        ) {
-          return localStorage.getItem("theme");
-        }
-        return window.matchMedia("(prefers-color-scheme: dark)").matches
-          ? "dark"
-          : "light";
+        const savedTheme =
+          typeof localStorage !== "undefined"
+            ? localStorage.getItem("theme")
+            : null;
+        return savedTheme === "light" || savedTheme === "dark"
+          ? savedTheme
+          : "dark";
       };
-      const isDark = getThemePreference() === "dark";
-      document.documentElement.classList[isDark ? "add" : "remove"]("dark");
+      const applyTheme = (theme) => {
+        const isDark = theme === "dark";
+        root.classList.toggle("dark", isDark);
+        root.style.colorScheme = isDark ? "dark" : "light";
+        if (typeof localStorage !== "undefined") {
+          localStorage.setItem("theme", theme);
+        }
+      };
+      applyTheme(getThemePreference());
 
       if (typeof localStorage !== "undefined") {
         const observer = new MutationObserver(() => {
-          const isDark = document.documentElement.classList.contains("dark");
+          const isDark = root.classList.contains("dark");
+          root.style.colorScheme = isDark ? "dark" : "light";
           localStorage.setItem("theme", isDark ? "dark" : "light");
         });
-        observer.observe(document.documentElement, {
+        observer.observe(root, {
           attributes: true,
           attributeFilter: ["class"],
         });
       }
 
+      if (!window.__themeToggleBound) {
+        window.__themeToggleBound = true;
+        document.addEventListener("click", (event) => {
+          const target = event.target;
+          if (!(target instanceof Element)) return;
+
+          const button = target.closest("[data-theme-toggle]");
+          if (!button) return;
+
+          const toggleTheme = () => {
+            applyTheme(root.classList.contains("dark") ? "light" : "dark");
+          };
+
+          if (
+            !document.startViewTransition ||
+            !(event instanceof MouseEvent)
+          ) {
+            toggleTheme();
+            return;
+          }
+
+          const x = event.clientX;
+          const y = event.clientY;
+          const endRadius = Math.hypot(
+            Math.max(x, innerWidth - x),
+            Math.max(y, innerHeight - y)
+          );
+          const wasLight = !root.classList.contains("dark");
+          const transition = document.startViewTransition(toggleTheme);
+
+          transition.ready.then(() => {
+            const clipPath = [
+              `circle(0px at ${x}px ${y}px)`,
+              `circle(${endRadius}px at ${x}px ${y}px)`,
+            ];
+
+            root.animate(
+              {
+                clipPath: wasLight ? clipPath : [...clipPath].reverse(),
+              },
+              {
+                duration: 400,
+                easing: "ease-in-out",
+                pseudoElement: wasLight
+                  ? "::view-transition-new(root)"
+                  : "::view-transition-old(root)",
+              }
+            );
+          });
+        });
+      }
+
       // Global mouse light (performance: rAF + CSS vars)
       if (window.matchMedia && window.matchMedia("(pointer: fine)").matches) {
-        document.documentElement.classList.add("has-pointer");
+        root.classList.add("has-pointer");
         let raf = 0,
-          latestX = 0,
-          latestY = 0;
+          releaseRaf = 0;
+        let latestX = window.innerWidth * 0.5,
+          latestY = window.innerHeight * 0.2;
+
+        const setLightOpacity = (value) => {
+          root.style.setProperty("--mouse-light-opacity", value.toString());
+        };
+
+        const stopRelease = () => {
+          if (releaseRaf) {
+            cancelAnimationFrame(releaseRaf);
+            releaseRaf = 0;
+          }
+        };
+
         const commit = () => {
           raf = 0;
-          document.documentElement.style.setProperty(
-            "--mouse-x",
-            `${latestX}px`
-          );
-          document.documentElement.style.setProperty(
-            "--mouse-y",
-            `${latestY}px`
-          );
+          root.style.setProperty("--mouse-x", `${latestX}px`);
+          root.style.setProperty("--mouse-y", `${latestY}px`);
         };
+
+        const animateRelease = () => {
+          stopRelease();
+          const fromX = latestX;
+          const fromY = latestY;
+          const toX = window.innerWidth * 0.5;
+          const toY = window.innerHeight * 0.2;
+          const start = performance.now();
+          const duration = 360;
+
+          const step = (now) => {
+            const progress = Math.min(1, (now - start) / duration);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            latestX = fromX + (toX - fromX) * eased;
+            latestY = fromY + (toY - fromY) * eased;
+            setLightOpacity(1 - eased);
+            commit();
+            if (progress < 1) {
+              releaseRaf = requestAnimationFrame(step);
+            } else {
+              releaseRaf = 0;
+            }
+          };
+
+          releaseRaf = requestAnimationFrame(step);
+        };
+
         window.addEventListener(
           "mousemove",
           (e) => {
+            stopRelease();
             latestX = e.clientX;
             latestY = e.clientY;
+            setLightOpacity(1);
             if (!raf) raf = requestAnimationFrame(commit);
           },
           { passive: true }
         );
+        window.addEventListener("mouseleave", animateRelease);
+        window.addEventListener("blur", animateRelease);
       }
     </script>
   </head>

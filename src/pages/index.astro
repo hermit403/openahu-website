@@ -4,17 +4,19 @@ import Hero from "../components/sections/Hero.astro";
 import ProjectCard from "../components/common/ProjectCard.astro";
 import MemberCard from "../components/common/MemberCard.astro";
 import { getCollection } from "astro:content";
+import { ahutongFallbackProject } from "../lib/projectFallback";
 
 const allProjects = await getCollection("projects");
 const allMembers = await getCollection("team");
+const projects = allProjects.length > 0 ? allProjects : [ahutongFallbackProject];
 ---
 
-<Layout title="OpenAHU - 开放、创新、协作">
+<Layout title="OpenAHU - 开放 创新 协作">
   <Hero cta={{ text: "了解更多", href: "/#projects" }} />
 
   <section id="projects" class="py-16 px-4">
     <div
-      class="container mx-auto max-w-6xl animate-fade-in opacity-0"
+      class="mx-auto w-[min(92%,72rem)] animate-fade-in opacity-0"
       style="animation-delay: 0.8s; animation-fill-mode: forwards;"
     >
       <div class="mb-8 text-center">
@@ -23,15 +25,15 @@ const allMembers = await getCollection("team");
         >
           开源项目
         </h2>
-        <p class="text-muted-foreground text-lg">
-          我们致力于构建高质量的校园服务应用
-        </p>
+        <br>
       </div>
 
-      <div class="flex flex-wrap justify-center gap-6">
+      <div
+        class="grid justify-center gap-6 [grid-template-columns:repeat(auto-fit,minmax(min(100%,20rem),20rem))]"
+      >
         {
-          allProjects.map((project) => (
-            <div class="w-full md:w-[calc(50%-1.5rem)] lg:w-[calc(33.333%-1.5rem)] flex justify-center">
+          projects.map((project) => (
+            <div class="flex justify-center">
               <ProjectCard project={project} />
             </div>
           ))
@@ -42,7 +44,7 @@ const allMembers = await getCollection("team");
 
   <section id="team" class="py-16 px-4">
     <div
-      class="container mx-auto max-w-6xl animate-fade-in opacity-0"
+      class="mx-auto w-[min(92%,72rem)] animate-fade-in opacity-0"
       style="animation-delay: 1.0s; animation-fill-mode: forwards;"
     >
       <div class="mb-8 text-center">
@@ -51,12 +53,14 @@ const allMembers = await getCollection("team");
         >
           团队成员
         </h2>
-        <p class="text-muted-foreground text-lg">一群热爱技术的开发者</p>
+        <br>
       </div>
-      <div class="flex flex-wrap justify-center gap-6">
+      <div
+        class="grid justify-center gap-6 items-start [grid-template-columns:repeat(auto-fit,minmax(min(100%,16rem),16rem))]"
+      >
         {
           allMembers.map((member) => (
-            <div class="w-full sm:w-[calc(50%-1.5rem)] md:w-[calc(33.333%-1.5rem)] lg:w-[calc(25%-1.5rem)] flex justify-center">
+            <div class="flex justify-center">
               <MemberCard member={member} />
             </div>
           ))

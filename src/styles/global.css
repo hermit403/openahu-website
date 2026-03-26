@@ -3,11 +3,20 @@
 @theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
   --color-primary-new: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", "Fira Code", monospace;
   --radius-sm: 0.25rem;
@@ -21,9 +30,17 @@
     --foreground: #09090b;
     --primary: #000000;
     --primary-foreground: #ffffff;
+    --secondary: #f4f4f5;
+    --secondary-foreground: #09090b;
+    --accent: #f4f4f5;
+    --accent-foreground: #09090b;
     --muted: #f4f4f5;
     --muted-foreground: #71717a;
     --border: #e4e4e7;
+    --input: #e4e4e7;
+    --ring: #09090b;
+    --destructive: #dc2626;
+    --destructive-foreground: #ffffff;
   }
 
   .dark {
@@ -31,9 +48,17 @@
     --foreground: #ffffff;
     --primary: #ffffff;
     --primary-foreground: #000000;
+    --secondary: #18181b;
+    --secondary-foreground: #ffffff;
+    --accent: #27272a;
+    --accent-foreground: #ffffff;
     --muted: #27272a;
     --muted-foreground: #a1a1aa;
     --border: #27272a;
+    --input: #27272a;
+    --ring: #ffffff;
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
   }
 }
 
@@ -166,6 +191,7 @@ body {
 :root {
   --mouse-x: 50vw;
   --mouse-y: 20vh;
+  --mouse-light-opacity: 0;
 }
 
 .global-mouse-light {
@@ -174,7 +200,6 @@ body {
   pointer-events: none;
   z-index: 0;
   opacity: 0;
-  transition: opacity 200ms ease;
   background: radial-gradient(
     700px circle at var(--mouse-x) var(--mouse-y),
     rgba(0, 0, 0, 0.06),
@@ -191,7 +216,7 @@ body {
 }
 
 .has-pointer .global-mouse-light {
-  opacity: 1;
+  opacity: var(--mouse-light-opacity);
 }
 
 /* Opt-in full-width glass surface.
@@ -203,6 +228,93 @@ body {
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+}
+
+/* Markdown content */
+.markdown-content {
+  color: var(--color-foreground);
+  line-height: 1.75;
+}
+
+.markdown-content > :first-child {
+  margin-top: 0;
+}
+
+.markdown-content :where(h2, h3, h4) {
+  color: var(--color-foreground);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.markdown-content h2 {
+  font-size: 1.75rem;
+}
+
+.markdown-content h3 {
+  font-size: 1.25rem;
+}
+
+.markdown-content h4 {
+  font-size: 1.125rem;
+}
+
+.markdown-content :where(p, ul, ol, pre, blockquote) {
+  margin: 1rem 0;
+}
+
+.markdown-content :where(ul, ol) {
+  padding-left: 1.25rem;
+}
+
+.markdown-content ul {
+  list-style: disc;
+}
+
+.markdown-content ol {
+  list-style: decimal;
+}
+
+.markdown-content li + li {
+  margin-top: 0.5rem;
+}
+
+.markdown-content a {
+  color: var(--color-foreground);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.markdown-content strong {
+  color: var(--color-foreground);
+}
+
+.markdown-content code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background: color-mix(in srgb, var(--color-muted) 80%, transparent);
+  border-radius: 0.375rem;
+  padding: 0.15rem 0.35rem;
+}
+
+.markdown-content pre {
+  background: color-mix(in srgb, var(--color-muted) 90%, transparent);
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  overflow-x: auto;
+  padding: 1rem;
+}
+
+.markdown-content pre code {
+  background: transparent;
+  padding: 0;
+}
+
+.markdown-content hr {
+  border: 0;
+  border-top: 1px solid var(--color-border);
+  margin: 2rem 0;
 }
 
 /* Minimalist scrollbar */

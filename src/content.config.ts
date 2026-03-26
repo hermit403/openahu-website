@@ -18,6 +18,7 @@ const projects = defineCollection({
     title: z.string(),
     slug: z.string().optional(),
     desc: z.string(),
+    downloadUrl: z.string().optional(),
     screenshots: z.array(z.string()).optional(),
     techstack: z.array(z.string()),
     links: z.array(

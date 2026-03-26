@@ -3,18 +3,32 @@ import { getCollection, render } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import Button from "../../components/ui/Button.astro";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
+import {
+  ahutongFallbackBodyHtml,
+  ahutongFallbackProject,
+} from "../../lib/projectFallback";
 
 export async function getStaticPaths() {
   const projects = await getCollection("projects");
-  return projects.map((project) => ({
+  const projectEntries =
+    projects.length > 0 ? projects : [ahutongFallbackProject];
+
+  return projectEntries.map((project) => ({
     params: { slug: project.data.slug || project.id },
-    props: { project },
+    props: {
+      project,
+      fallbackBodyHtml:
+        project.id === ahutongFallbackProject.id && projects.length === 0
+          ? ahutongFallbackBodyHtml
+          : undefined,
+    },
   }));
 }
 
-const { project } = Astro.props;
-const { title, desc, techstack, screenshots, links } = project.data;
-const { Content } = await render(project);
+const { project, fallbackBodyHtml } = Astro.props;
+const { title, desc, downloadUrl, techstack, screenshots, links } = project.data;
+const rendered = fallbackBodyHtml ? null : await render(project);
+const Content = rendered?.Content ?? null;
 
 const skillIconsUrl = `https://skillicons.dev/icons?i=${techstack.map((t) => t.toLowerCase().replace(/\s+/g, "")).join(",")}`;
 ---
@@ -33,16 +47,33 @@ const skillIconsUrl = `https://skillicons.dev/icons?i=${techstack.map((t) => t.t
         <p class="text-xl text-muted-foreground">{desc}</p>
 
         <div class="flex items-center gap-4 pt-4">
-          <img src={skillIconsUrl} alt="Tech Stack" height="40" class="h-10" />
+          <img
+            src={skillIconsUrl}
+            alt="Tech Stack"
+            height="40"
+            class="h-10"
+            decoding="async"
+          />
         </div>
 
-        <div class="flex gap-4 pt-4">
+        <div class="flex flex-wrap gap-3 pt-4">
+          {
+            downloadUrl !== undefined &&
+              (downloadUrl ? (
+                <Button href={downloadUrl} target="_blank" rel="noreferrer">
+                  下载
+                </Button>
+              ) : (
+                <Button disabled>暂无下载链接</Button>
+              ))
+          }
           {
             links.map((link) => (
               <Button
                 variant={link.name === "Website" ? "default" : "outline"}
                 href={link.url}
                 target="_blank"
+                rel="noreferrer"
               >
                 {link.name}
               </Button>
@@ -59,15 +90,23 @@ const skillIconsUrl = `https://skillicons.dev/icons?i=${techstack.map((t) => t.t
                 src={shot}
                 alt={`Screenshot of ${title}`}
                 class="rounded-lg border border-border shadow-sm w-full"
+                decoding="async"
+                loading="lazy"
               />
             ))}
           </div>
         )
       }
 
-      <div class="prose prose-neutral dark:prose-invert max-w-none">
-        <Content />
-      </div>
+      {
+        fallbackBodyHtml ? (
+          <div class="markdown-content max-w-none" set:html={fallbackBodyHtml} />
+        ) : Content ? (
+          <div class="markdown-content max-w-none">
+            <Content />
+          </div>
+        ) : null
+      }
     </div>
   </div>
 </Layout>

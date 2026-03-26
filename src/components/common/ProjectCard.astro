@@ -15,7 +15,7 @@ const skillIconsUrl = `https://skillicons.dev/icons?i=${techstack.map((t) => t.t
 ---
 
 <div
-  class="group relative rounded-xl font-sans transition-transform duration-300 hover:-translate-y-1 w-full max-w-sm"
+  class="group relative rounded-xl font-sans w-full max-w-sm"
 >
   <LiquidContainer
     client:visible
@@ -48,6 +48,8 @@ const skillIconsUrl = `https://skillicons.dev/icons?i=${techstack.map((t) => t.t
           src={skillIconsUrl}
           alt="Tech Stack"
           class="h-full object-contain object-left"
+          height="40"
+          decoding="async"
           loading="lazy"
         />
       </div>
