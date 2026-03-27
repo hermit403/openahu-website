@@ -9,7 +9,7 @@ export const ahutongFallbackProject = {
     desc: "安大通是一个立足于安徽大学，由安徽大学学生自主开发的集校园一卡通、电子课表、成绩查询、考试查询等实用功能于一体的App",
     downloadUrl: "",
     screenshots: ["/images/projects/ahutong/preview.png"],
-    techstack: ["Kotlin", "Java", "Rust", "Android"],
+    techstack: ["Kotlin", "Java", "Rust"],
     links: [
       {
         name: "GitHub",

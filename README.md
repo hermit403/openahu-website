@@ -9,23 +9,32 @@ OpenAHU 的官方展示网站
 ```
 openahu-website/
 ├── public/                 # 静态资源
-│   └── favicon.svg
+│   ├── favicon.png
+│   ├── .nojekyll          # GitHub Pages 配置
+│   └── images/            # 图片资源
+│       ├── projects/      # 项目图片
+│       └── team/          # 团队成员头像
 ├── src/
-│   ├── assets/styles/      # 全局样式
 │   ├── components/        # 组件
-│   │   ├── ui/           # UI 组件
-│   │   ├── layout/       # 布局组件
-│   │   ├── sections/     # 页面区块组件
-│   │   └── common/      # 通用组件
-│   ├── content/         # 内容集合
-│   │   ├── team/          # 团队成员数据
-│   │   └── projects/      # 项目数据
-│   ├── layouts/         # 页面布局
-│   └── pages/           # 页面
-├── astro.config.mjs     # Astro 配置
-├── tsconfig.json        # TypeScript 配置
-├── package.json        # 项目依赖
-└── README.md           # 项目说明
+│   │   ├── ui/           # UI 组件 (Button, Card, LiquidContainer)
+│   │   ├── layout/       # 布局组件 (Header, Footer, Navigation)
+│   │   ├── sections/     # 页面区块组件 (Hero)
+│   │   └── common/       # 通用组件 (Logo, MemberCard, ProjectCard, SocialLinks, ThemeToggle)
+│   ├── content/          # 内容集合
+│   │   ├── team/         # 团队成员数据
+│   │   └── projects/     # 项目数据
+│   ├── layouts/          # 页面布局
+│   ├── lib/              # 工具函数
+│   ├── pages/            # 页面
+│   │   ├── index.astro   # 首页
+│   │   ├── about.astro   # 关于页面
+│   │   └── projects/     # 项目详情页
+│   ├── styles/           # 全局样式
+│   └── content.config.ts # 内容集合配置
+├── astro.config.mjs      # Astro 配置
+├── tsconfig.json         # TypeScript 配置
+├── package.json          # 项目依赖
+└── README.md             # 项目说明
 ```
 
 ## Quickstart
@@ -83,3 +92,11 @@ links:
     url: "https://github.com/..."
 ---
 ```
+
+## 技术栈
+
+- **框架**: [Astro](https://astro.build/) - 现代化静态站点生成器
+- **UI**: [React](https://react.dev/) + [Tailwind CSS](https://tailwindcss.com/)
+- **包管理**: [pnpm](https://pnpm.io/)
+- **构建工具**: [Vite](https://vitejs.dev/)
+- **语言**: TypeScript
