@@ -30,12 +30,13 @@ const playMotion = (element: HTMLElement) => {
   const scale = Number(element.dataset.motionScale ?? 1);
   const duration = Number(element.dataset.motionDuration ?? 1000);
   const delay = Number(element.dataset.motionDelay ?? 0);
+  const shouldFade = element.dataset.motionFade !== "false";
 
   element.dataset.motionRunning = "";
-  element.style.willChange = "opacity, transform";
+  element.style.willChange = shouldFade ? "opacity, transform" : "transform";
 
   animate(element, {
-    opacity: { from: 0, to: 1 },
+    ...(shouldFade ? { opacity: { from: 0, to: 1 } } : {}),
     y: { from: y, to: 0 },
     scale: { from: scale, to: 1 },
     duration,

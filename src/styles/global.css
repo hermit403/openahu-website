@@ -136,8 +136,17 @@
    inline bootstrap when motion is allowed, so content remains visible without
    JavaScript and for people who prefer reduced motion. */
 .motion-capable [data-motion] {
-  opacity: 0;
   will-change: opacity, transform;
+}
+
+.motion-capable [data-motion]:not([data-motion-fade="false"]) {
+  opacity: 0;
+}
+
+.motion-capable [data-motion][data-motion-fade="false"] {
+  transform: translate3d(0, var(--motion-initial-y, 0), 0)
+    scale(var(--motion-initial-scale, 1));
+  will-change: transform;
 }
 
 /* Liquid Glass Utilities */
@@ -642,8 +651,8 @@ body {
   }
 }
 
-/* Touch devices keep the same refractive material. Pointer elasticity is
-   disabled in React on coarse pointers, so this remains a stable glass layer. */
+/* Touch devices keep the same refractive material. Touch-enabled cards add a
+   short press/release response in React without taking over page scrolling. */
 @media (pointer: coarse), (max-width: 480px) {
   .liquid-surface .glass__warp {
     -webkit-backdrop-filter: blur(16px) saturate(126%) !important;

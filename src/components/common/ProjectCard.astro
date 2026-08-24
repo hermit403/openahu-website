@@ -27,6 +27,7 @@ const githubLink = links.find((link) => link.name === "GitHub");
     className="w-full rounded-[1.75rem]"
     radius={28}
     elasticity={0.32}
+    touchElastic
   >
     <div class="relative z-10 flex flex-col gap-3.5">
       <div class="flex items-start justify-between gap-3">
@@ -65,7 +66,7 @@ const githubLink = links.find((link) => link.name === "GitHub");
           variant="outline"
           size="sm"
           class="w-full z-10 relative"
-          href={`/projects/${slug}`}
+          href={`/projects/${slug}/`}
         >
           查看详情
         </Button>

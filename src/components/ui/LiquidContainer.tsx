@@ -29,6 +29,7 @@ interface LiquidContainerProps {
   fill?: boolean;
   layoutMode?: "overlay" | "inline";
   interactive?: boolean;
+  touchElastic?: boolean;
   onClick?: () => void;
 }
 
@@ -53,10 +54,12 @@ export default function LiquidContainer({
   fill = false,
   layoutMode = "overlay",
   interactive = true,
+  touchElastic = false,
   onClick,
 }: LiquidContainerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const releaseAnimationRef = useRef<{ cancel: () => unknown } | null>(null);
+  const touchScaleAnimationRef = useRef<{ cancel: () => unknown } | null>(null);
   const moveRafRef = useRef<number | null>(null);
   const latestPointerRef = useRef<{ x: number; y: number } | null>(null);
 
@@ -108,9 +111,8 @@ export default function LiquidContainer({
       return;
     }
 
-    const finePointer = window.matchMedia("(pointer: fine)");
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (!finePointer.matches || reducedMotion.matches) {
+    if (reducedMotion.matches) {
       return;
     }
 
@@ -118,6 +120,9 @@ export default function LiquidContainer({
     if (!container) {
       return;
     }
+    const finePointer = window.matchMedia("(pointer: fine)");
+    let activeTouchId: number | null = null;
+    let touchStart = { x: 0, y: 0 };
 
     const stopRelease = () => {
       if (releaseAnimationRef.current !== null) {
@@ -134,15 +139,28 @@ export default function LiquidContainer({
       latestPointerRef.current = null;
     };
 
-    const updatePointerState = (clientX: number, clientY: number) => {
+    const stopTouchScale = () => {
+      touchScaleAnimationRef.current?.cancel();
+      touchScaleAnimationRef.current = null;
+    };
+
+    const updatePointerState = (
+      clientX: number,
+      clientY: number,
+      offsetScale = 1,
+    ) => {
       const rect = container.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
       const centerY = rect.top + rect.height / 2;
       const next = {
         globalMousePos: { x: clientX, y: clientY },
         mouseOffset: {
-          x: rect.width ? ((clientX - centerX) / rect.width) * 100 : 0,
-          y: rect.height ? ((clientY - centerY) / rect.height) * 100 : 0,
+          x: rect.width
+            ? ((clientX - centerX) / rect.width) * 100 * offsetScale
+            : 0,
+          y: rect.height
+            ? ((clientY - centerY) / rect.height) * 100 * offsetScale
+            : 0,
         },
       };
 
@@ -150,7 +168,7 @@ export default function LiquidContainer({
       setPointerState(next);
     };
 
-    const animateRelease = () => {
+    const animateRelease = (releaseTouchScale = false) => {
       stopRelease();
       const startState = pointerStateRef.current;
       const endState = getRestPointerState();
@@ -189,9 +207,37 @@ export default function LiquidContainer({
           releaseAnimationRef.current = null;
         },
       });
+
+      if (releaseTouchScale) {
+        stopTouchScale();
+        delete container.dataset.touchActive;
+        container.style.willChange = "transform";
+        touchScaleAnimationRef.current = animate(container, {
+          scale: { to: 1, duration: 340 },
+          ease: spring({ duration: 340, bounce: 0.1 }),
+          onComplete: () => {
+            container.style.removeProperty("transform");
+            container.style.removeProperty("will-change");
+            touchScaleAnimationRef.current = null;
+          },
+        });
+      }
     };
 
     const handlePointerMove = (event: PointerEvent) => {
+      if (activeTouchId === event.pointerId) {
+        const travelX = Math.abs(event.clientX - touchStart.x);
+        const travelY = Math.abs(event.clientY - touchStart.y);
+        if (Math.max(travelX, travelY) > 12) {
+          activeTouchId = null;
+          animateRelease(true);
+          return;
+        }
+        updatePointerState(event.clientX, event.clientY, 0.56);
+        return;
+      }
+
+      if (!finePointer.matches || event.pointerType === "touch") return;
       stopRelease();
       latestPointerRef.current = { x: event.clientX, y: event.clientY };
       if (moveRafRef.current !== null) return;
@@ -205,18 +251,66 @@ export default function LiquidContainer({
       });
     };
 
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!touchElastic || event.pointerType !== "touch" || !event.isPrimary) {
+        return;
+      }
+
+      stopRelease();
+      stopMove();
+      stopTouchScale();
+      activeTouchId = event.pointerId;
+      touchStart = { x: event.clientX, y: event.clientY };
+      container.dataset.touchActive = "";
+      container.style.willChange = "transform";
+      updatePointerState(event.clientX, event.clientY, 0.56);
+      touchScaleAnimationRef.current = animate(container, {
+        scale: { to: 0.994, duration: 110 },
+        ease: "outQuad",
+      });
+    };
+
+    const finishTouch = (event: PointerEvent) => {
+      if (activeTouchId !== event.pointerId) return;
+      activeTouchId = null;
+      animateRelease(true);
+    };
+
+    const handlePointerLeave = (event: PointerEvent) => {
+      if (activeTouchId === event.pointerId) {
+        activeTouchId = null;
+        animateRelease(true);
+        return;
+      }
+      if (finePointer.matches && event.pointerType !== "touch") {
+        animateRelease();
+      }
+    };
+
     container.addEventListener("pointermove", handlePointerMove, {
       passive: true,
     });
-    container.addEventListener("pointerleave", animateRelease);
+    container.addEventListener("pointerdown", handlePointerDown, {
+      passive: true,
+    });
+    container.addEventListener("pointerleave", handlePointerLeave);
+    window.addEventListener("pointerup", finishTouch, { passive: true });
+    window.addEventListener("pointercancel", finishTouch, { passive: true });
 
     return () => {
       stopRelease();
       stopMove();
+      stopTouchScale();
+      delete container.dataset.touchActive;
+      container.style.removeProperty("transform");
+      container.style.removeProperty("will-change");
       container.removeEventListener("pointermove", handlePointerMove);
-      container.removeEventListener("pointerleave", animateRelease);
+      container.removeEventListener("pointerdown", handlePointerDown);
+      container.removeEventListener("pointerleave", handlePointerLeave);
+      window.removeEventListener("pointerup", finishTouch);
+      window.removeEventListener("pointercancel", finishTouch);
     };
-  }, [interactive]);
+  }, [interactive, touchElastic]);
 
   const variantClass =
     variant === "pill"
