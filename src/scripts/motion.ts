@@ -87,7 +87,10 @@ const startMotion = () => {
         playMotion(element);
       });
     },
-    { rootMargin: "0px 0px -8%", threshold: 0.12 },
+    // Trigger as soon as the element reaches the active viewport. A fixed
+    // percentage can require scrolling deep into a long block, or become
+    // unreachable on shorter mobile viewports while the block stays hidden.
+    { rootMargin: "0px 0px -8%", threshold: 0 },
   );
 
   viewportElements.forEach((element) => observer.observe(element));
