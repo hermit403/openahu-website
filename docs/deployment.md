@@ -43,7 +43,7 @@ DEPLOY_PATH → 新 release
 - 服务器提供 `bash`、`tar`、`ssh` 及支持 `mv -T` 的 GNU coreutils。
 - `DEPLOY_PATH` 不得为 `/`。
 
-Release 保存在 `DEPLOY_PATH` 同级的 `releases/` 目录。当前工作流不会自动清理旧版本，应按服务器容量单独制定保留策略。
+Release 保存在 `DEPLOY_PATH` 同级的 `releases/` 目录。新版本完成公网冒烟测试后，工作流只保留按修改时间排序的最近 10 个 release；当前软链接指向的 release 始终受到保护。
 
 ## SSH 安全
 

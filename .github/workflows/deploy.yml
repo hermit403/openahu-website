@@ -22,26 +22,22 @@ jobs:
     environment:
       name: production
       url: https://openahu.org
-    env:
-      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-      DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
-      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-      DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
-      DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
-      DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Validate deployment configuration
         shell: bash
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
         run: |
           set -euo pipefail
           test -n "$DEPLOY_HOST"
           test -n "$DEPLOY_PORT"
           test -n "$DEPLOY_USER"
-          test -n "$DEPLOY_SSH_KEY"
-          test -n "$DEPLOY_KNOWN_HOSTS"
           test -n "$DEPLOY_PATH"
 
           if [[ ! "$DEPLOY_PORT" =~ ^[0-9]{1,5}$ ]] ||
@@ -56,7 +52,7 @@ jobs:
           fi
 
       - name: Setup pnpm and Node.js
-        uses: pnpm/setup@v2
+        uses: pnpm/setup@84cb39b217b10273981911c288cd62326dc7c6d2 # v2.0.2
         with:
           runtime: node@24
           cache: true
@@ -70,6 +66,9 @@ jobs:
 
       - name: Configure SSH
         shell: bash
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
         run: |
           set -euo pipefail
           install -m 700 -d "$RUNNER_TEMP/openahu-ssh"
@@ -84,6 +83,10 @@ jobs:
 
       - name: Upload production archive
         shell: bash
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
         run: |
           set -euo pipefail
           archive="openahu-${GITHUB_SHA}-${GITHUB_RUN_ATTEMPT}.tar.gz"
@@ -98,6 +101,11 @@ jobs:
 
       - name: Activate release atomically
         shell: bash
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
         run: |
           set -euo pipefail
           archive="openahu-${GITHUB_SHA}-${GITHUB_RUN_ATTEMPT}.tar.gz"
@@ -160,3 +168,67 @@ jobs:
               --output /dev/null \
               "https://openahu.org$route"
           done
+
+      - name: Keep the 10 most recent releases
+        shell: bash
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
+        run: |
+          set -euo pipefail
+          ssh \
+            -p "$DEPLOY_PORT" \
+            -i "$RUNNER_TEMP/openahu-ssh/key" \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/openahu-ssh/known_hosts" \
+            "$DEPLOY_USER@$DEPLOY_HOST" \
+            bash -s -- "$DEPLOY_PATH" <<'REMOTE'
+          set -euo pipefail
+
+          deploy_path=$1
+          deploy_parent=$(dirname "$deploy_path")
+          releases_path="$deploy_parent/releases"
+          active_release=$(readlink -f "$deploy_path")
+
+          if [ ! -d "$releases_path" ] || [ -z "$active_release" ]; then
+            echo "Release directory or active release is unavailable" >&2
+            exit 1
+          fi
+
+          case "$active_release" in
+            "$releases_path"/*) ;;
+            *)
+              echo "Active release is outside the managed release directory" >&2
+              exit 1
+              ;;
+          esac
+
+          find "$releases_path" \
+            -mindepth 1 \
+            -maxdepth 1 \
+            -type d \
+            -printf '%T@ %p\0' \
+            | sort -z -nr \
+            | tail -z -n +11 \
+            | while IFS= read -r -d '' release_entry; do
+                stale_release=${release_entry#* }
+
+                if [ "$stale_release" = "$active_release" ]; then
+                  continue
+                fi
+
+                case "$stale_release" in
+                  "$releases_path"/*)
+                    echo "Removing stale release: $stale_release"
+                    rm -rf -- "$stale_release"
+                    ;;
+                  *)
+                    echo "Refusing to remove an unmanaged path" >&2
+                    exit 1
+                    ;;
+                esac
+              done
+          REMOTE
