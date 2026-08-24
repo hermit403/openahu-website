@@ -20,6 +20,14 @@ links:
 
 安大通是一款专为安徽大学师生设计的校园生活服务应用。它集成了校园卡服务、教务系统查询（课表、成绩、考试）、生活缴费等功能。项目采用现代化的 Android 技术栈开发。
 
+安大通正在建设 AIO（All in One）仓库，用于统一管理不同平台的客户端。目前仓库已接入 Android、HarmonyOS 和 iOS 子仓。
+
+Android 客户端采用 MVVM 架构，UI 使用 Jetpack Compose 和 Material 3，以 Kotlin 为主并包含少量 Java 代码；核心校园数据能力由 Rust SDK 提供，经 JNI 接入 Android，并使用 Tokio、Axum 和 Reqwest 实现本地服务及网络访问。
+
+HarmonyOS 客户端预计使用 ArkTS 和 ArkUI，iOS 客户端预计使用 Swift 和 SwiftUI。
+
+同时，基于 Tauri 的 AHUTong-Tauri 正在规划中，一套代码，多端适配（Android/iOS/...）
+
 ## Changelogs
 
 ### v3.2.2
