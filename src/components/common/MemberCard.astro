@@ -12,24 +12,28 @@ const { name, desc, avatar, github, website } = member.data;
 ---
 
 <div
-  class="group flex flex-col w-[min(100%,16rem)] mx-auto"
+  class="liquid-card-frame group mx-auto flex w-[min(100%,16rem)] flex-col rounded-[1.75rem]"
+  data-motion
+  data-motion-trigger="view"
+  data-motion-y="24"
 >
   <LiquidContainer
     client:visible
     fill
-    className="w-full rounded-xl"
-    radius={12}
-    padding="1.25rem"
+    className="w-full rounded-[1.75rem]"
+    radius={28}
+    elasticity={0.3}
+    padding="1.125rem"
   >
     <div
-      class="flex min-h-[15rem] w-full flex-col items-center justify-center text-center"
+      class="flex min-h-[14rem] w-full flex-col items-center justify-center text-center"
     >
       <div
-        class="relative mb-4 h-24 w-24 overflow-hidden rounded-full border-2 border-border/50 group-hover:border-primary/30 transition-colors"
+        class="relative mb-3.5 h-24 w-24 overflow-hidden rounded-full border-2 border-border/50 group-hover:border-primary/30 transition-colors"
       >
         <img
           src={avatar}
-          alt={name}
+          alt={`${name} 的头像`}
           class="h-full w-full object-cover"
           width="96"
           height="96"
@@ -38,16 +42,18 @@ const { name, desc, avatar, github, website } = member.data;
         />
       </div>
       <h3 class="text-lg font-bold">{name}</h3>
-      <p class="mt-2 text-sm text-muted-foreground line-clamp-2 min-h-[2.5rem]">
+      <p class="mt-2 text-pretty text-sm leading-relaxed text-muted-foreground">
         {desc}
       </p>
-      <div class="mt-4 flex gap-3 justify-center z-10 relative">
+      <div class="relative z-10 mt-3.5 flex justify-center gap-3">
         {
           github && (
             <a
               href={`https://github.com/${github}`}
               target="_blank"
-              class="text-muted-foreground hover:text-foreground transition-colors p-1"
+              rel="noreferrer"
+              aria-label={`${name} 的 GitHub 主页`}
+              class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-black/5 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:hover:bg-white/10"
             >
               <GitHubLogoIcon className="h-5 w-5" />
             </a>
@@ -58,7 +64,9 @@ const { name, desc, avatar, github, website } = member.data;
             <a
               href={website}
               target="_blank"
-              class="text-muted-foreground hover:text-foreground transition-colors p-1"
+              rel="noreferrer"
+              aria-label={`${name} 的个人网站`}
+              class="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-black/5 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:hover:bg-white/10"
             >
               <GlobeIcon className="h-5 w-5" />
             </a>

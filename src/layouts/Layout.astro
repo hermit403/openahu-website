@@ -1,13 +1,8 @@
 ---
 import "../styles/global.css";
-import "@fontsource/inter/400.css";
-import "@fontsource/inter/500.css";
-import "@fontsource/inter/600.css";
-import "@fontsource/inter/700.css";
-import "@fontsource/jetbrains-mono/400.css";
-import "@fontsource/jetbrains-mono/500.css";
 import Header from "../components/layout/Header.astro";
 import Footer from "../components/layout/Footer.astro";
+import { ClientRouter } from "astro:transitions";
 
 interface Props {
   title?: string;
@@ -28,12 +23,14 @@ const {
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="preload" as="image" href="/favicon.png" />
-    <link rel="dns-prefetch" href="//skillicons.dev" />
-    <link rel="preconnect" href="https://skillicons.dev" crossorigin />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+    <ClientRouter fallback="animate" />
     <script is:inline>
       const root = document.documentElement;
+      const motionAllowed = !window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
       const getThemePreference = () => {
         const savedTheme =
           typeof localStorage !== "undefined"
@@ -47,22 +44,33 @@ const {
         const isDark = theme === "dark";
         root.classList.toggle("dark", isDark);
         root.style.colorScheme = isDark ? "dark" : "light";
+        root.dataset.theme = theme;
         if (typeof localStorage !== "undefined") {
           localStorage.setItem("theme", theme);
         }
+        document.querySelectorAll("[data-theme-toggle]").forEach((button) => {
+          button.setAttribute("aria-pressed", isDark.toString());
+          button.setAttribute(
+            "aria-label",
+            isDark ? "切换至浅色模式" : "切换至深色模式",
+          );
+        });
+        window.dispatchEvent(
+          new CustomEvent("openahu:theme-change", { detail: { theme } }),
+        );
       };
-      applyTheme(getThemePreference());
-
-      if (typeof localStorage !== "undefined") {
-        const observer = new MutationObserver(() => {
-          const isDark = root.classList.contains("dark");
-          root.style.colorScheme = isDark ? "dark" : "light";
-          localStorage.setItem("theme", isDark ? "dark" : "light");
-        });
-        observer.observe(root, {
-          attributes: true,
-          attributeFilter: ["class"],
-        });
+      const syncDocumentState = () => {
+        root.classList.toggle("motion-capable", motionAllowed);
+        root.classList.toggle("has-pointer", Boolean(window.__mouseLightBound));
+        applyTheme(getThemePreference());
+      };
+      syncDocumentState();
+      document.addEventListener("DOMContentLoaded", syncDocumentState, {
+        once: true,
+      });
+      if (!window.__documentStateBound) {
+        window.__documentStateBound = true;
+        document.addEventListener("astro:after-swap", syncDocumentState);
       }
 
       if (!window.__themeToggleBound) {
@@ -80,7 +88,8 @@ const {
 
           if (
             !document.startViewTransition ||
-            !(event instanceof MouseEvent)
+            !(event instanceof MouseEvent) ||
+            window.matchMedia("(prefers-reduced-motion: reduce)").matches
           ) {
             toggleTheme();
             return;
@@ -90,10 +99,15 @@ const {
           const y = event.clientY;
           const endRadius = Math.hypot(
             Math.max(x, innerWidth - x),
-            Math.max(y, innerHeight - y)
+            Math.max(y, innerHeight - y),
           );
           const wasLight = !root.classList.contains("dark");
+          root.classList.add("theme-transitioning");
           const transition = document.startViewTransition(toggleTheme);
+
+          transition.finished.finally(() => {
+            root.classList.remove("theme-transitioning");
+          });
 
           transition.ready.then(() => {
             const clipPath = [
@@ -111,14 +125,20 @@ const {
                 pseudoElement: wasLight
                   ? "::view-transition-new(root)"
                   : "::view-transition-old(root)",
-              }
+              },
             );
           });
         });
       }
 
       // Global mouse light (performance: rAF + CSS vars)
-      if (window.matchMedia && window.matchMedia("(pointer: fine)").matches) {
+      if (
+        !window.__mouseLightBound &&
+        window.matchMedia &&
+        window.matchMedia("(pointer: fine)").matches &&
+        !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      ) {
+        window.__mouseLightBound = true;
         root.classList.add("has-pointer");
         let raf = 0,
           releaseRaf = 0;
@@ -177,7 +197,7 @@ const {
             setLightOpacity(1);
             if (!raf) raf = requestAnimationFrame(commit);
           },
-          { passive: true }
+          { passive: true },
         );
         window.addEventListener("mouseleave", animateRelease);
         window.addEventListener("blur", animateRelease);
@@ -187,11 +207,16 @@ const {
   <body
     class="min-h-screen bg-background text-foreground font-sans antialiased flex flex-col selection:bg-black selection:text-white dark:selection:bg-white dark:selection:text-black"
   >
+    <div class="ambient-background" aria-hidden="true"></div>
     <div class="global-mouse-light" aria-hidden="true"></div>
     <Header />
-    <main class="flex-grow relative z-10">
+    <main transition:name="page-content" class="flex-grow relative z-10">
       <slot />
     </main>
     <Footer />
+    <script>
+      import "../scripts/motion";
+      import "../scripts/navigation";
+    </script>
   </body>
 </html>

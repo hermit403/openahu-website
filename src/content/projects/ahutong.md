@@ -3,12 +3,16 @@ title: "安大通"
 desc: "安大通是一个立足于安徽大学，由安徽大学学生自主开发的集校园一卡通、电子课表、成绩查询、考试查询等实用功能于一体的App"
 downloadUrl: "https://openahu.org/download/ahutong.apk"
 screenshots:
-  - "/images/projects/ahutong/preview.png"
+  - src: "/images/projects/ahutong/preview.png"
+    alt: "安大通应用界面预览"
+    width: 1231
+    height: 846
 techstack:
   - "Kotlin"
   - "Java"
   - "Rust"
-  - "Android"
+  - name: "Android"
+    icon: "androidstudio"
 links:
   - name: "GitHub"
     url: "https://github.com/OpenAHU/AHUTong"

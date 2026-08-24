@@ -1,0 +1,162 @@
+name: Deploy to production server
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  ASTRO_TELEMETRY_DISABLED: 1
+
+concurrency:
+  group: production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: production
+      url: https://openahu.org
+    env:
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+      DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+      DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Validate deployment configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$DEPLOY_HOST"
+          test -n "$DEPLOY_PORT"
+          test -n "$DEPLOY_USER"
+          test -n "$DEPLOY_SSH_KEY"
+          test -n "$DEPLOY_KNOWN_HOSTS"
+          test -n "$DEPLOY_PATH"
+
+          if [[ ! "$DEPLOY_PORT" =~ ^[0-9]{1,5}$ ]] ||
+            ((10#$DEPLOY_PORT < 1 || 10#$DEPLOY_PORT > 65535)); then
+            echo "DEPLOY_PORT must be an integer between 1 and 65535" >&2
+            exit 1
+          fi
+
+          if [[ "$DEPLOY_PATH" != /* || "$DEPLOY_PATH" == "/" || "$DEPLOY_PATH" == */ ]]; then
+            echo "DEPLOY_PATH must be an absolute, non-root path without a trailing slash" >&2
+            exit 1
+          fi
+
+      - name: Setup pnpm and Node.js
+        uses: pnpm/setup@v2
+        with:
+          runtime: node@24
+          cache: true
+          install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify source and production build
+        run: pnpm verify
+
+      - name: Configure SSH
+        shell: bash
+        run: |
+          set -euo pipefail
+          install -m 700 -d "$RUNNER_TEMP/openahu-ssh"
+          printf '%s\n' "$DEPLOY_SSH_KEY" > "$RUNNER_TEMP/openahu-ssh/key"
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > "$RUNNER_TEMP/openahu-ssh/known_hosts"
+          chmod 600 "$RUNNER_TEMP/openahu-ssh/key"
+          chmod 644 "$RUNNER_TEMP/openahu-ssh/known_hosts"
+
+      - name: Package production build
+        shell: bash
+        run: tar -C dist -czf "$RUNNER_TEMP/openahu-site.tar.gz" .
+
+      - name: Upload production archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="openahu-${GITHUB_SHA}-${GITHUB_RUN_ATTEMPT}.tar.gz"
+          scp \
+            -P "$DEPLOY_PORT" \
+            -i "$RUNNER_TEMP/openahu-ssh/key" \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/openahu-ssh/known_hosts" \
+            "$RUNNER_TEMP/openahu-site.tar.gz" \
+            "$DEPLOY_USER@$DEPLOY_HOST:$archive"
+
+      - name: Activate release atomically
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="openahu-${GITHUB_SHA}-${GITHUB_RUN_ATTEMPT}.tar.gz"
+          release_id="${GITHUB_SHA}-${GITHUB_RUN_ATTEMPT}"
+          ssh \
+            -p "$DEPLOY_PORT" \
+            -i "$RUNNER_TEMP/openahu-ssh/key" \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$RUNNER_TEMP/openahu-ssh/known_hosts" \
+            "$DEPLOY_USER@$DEPLOY_HOST" \
+            bash -s -- "$DEPLOY_PATH" "$release_id" "$archive" <<'REMOTE'
+          set -euo pipefail
+
+          deploy_path=$1
+          release_id=$2
+          archive_name=$3
+          archive_path="$HOME/$archive_name"
+          deploy_parent=$(dirname "$deploy_path")
+          releases_path="$deploy_parent/releases"
+          release_path="$releases_path/$release_id"
+          next_link="${deploy_path}.next"
+
+          trap 'rm -f "$archive_path"' EXIT
+
+          if [ "$deploy_path" = "/" ]; then
+            echo "Refusing to deploy to the filesystem root" >&2
+            exit 1
+          fi
+
+          if [ -e "$deploy_path" ] && [ ! -L "$deploy_path" ]; then
+            echo "DEPLOY_PATH must be absent or an existing symbolic link" >&2
+            exit 1
+          fi
+
+          mkdir -p "$release_path"
+          tar -xzf "$archive_path" -C "$release_path"
+
+          test -f "$release_path/index.html"
+          test -f "$release_path/about/index.html"
+
+          ln -sfn "$release_path" "$next_link"
+          mv -Tf "$next_link" "$deploy_path"
+          REMOTE
+
+      - name: Smoke test production routes
+        shell: bash
+        run: |
+          set -euo pipefail
+          for route in / /about/; do
+            curl \
+              --fail \
+              --silent \
+              --show-error \
+              --location \
+              --retry 4 \
+              --retry-all-errors \
+              --connect-timeout 10 \
+              --max-time 30 \
+              --output /dev/null \
+              "https://openahu.org$route"
+          done

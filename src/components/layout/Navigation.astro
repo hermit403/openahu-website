@@ -3,17 +3,38 @@ const navItems = [
   { name: "首页", href: "/" },
   { name: "关于", href: "/about" },
 ];
+
+const normalizePath = (path: string) =>
+  path === "/" ? path : path.replace(/\/+$/, "");
+const currentPath = normalizePath(Astro.url.pathname);
 ---
 
-<nav class="flex items-center space-x-6 font-medium">
+<nav
+  class="route-nav relative isolate flex items-center gap-1 font-medium sm:gap-3"
+  aria-label="主导航"
+  data-route-nav
+>
+  <span class="route-nav__indicator" data-route-indicator aria-hidden="true"
+  ></span>
   {
-    navItems.map((item) => (
-      <a
-        href={item.href}
-        class="transition-colors hover:text-foreground/80 text-foreground/60"
-      >
-        {item.name}
-      </a>
-    ))
+    navItems.map((item) => {
+      const isActive = currentPath === item.href;
+
+      return (
+        <a
+          href={item.href}
+          aria-current={isActive ? "page" : undefined}
+          data-route-link
+          data-route-path={item.href}
+          data-astro-prefetch="viewport"
+          class:list={[
+            "route-nav__link relative z-10 inline-flex min-h-11 items-center rounded-[0.9rem] px-2.5 text-sm text-foreground/60 transition-colors hover:text-foreground/85 sm:px-3 sm:text-base",
+            "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-foreground/20",
+          ]}
+        >
+          {item.name}
+        </a>
+      );
+    })
   }
 </nav>

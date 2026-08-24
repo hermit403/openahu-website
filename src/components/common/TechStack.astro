@@ -1,0 +1,139 @@
+---
+import { icons as skillIcons } from "@iconify-json/skill-icons";
+
+type Technology = string | { name: string; icon: string };
+type SkillIcon = (typeof skillIcons.icons)[string];
+
+interface Props {
+  technologies: Technology[];
+  class?: string;
+  size?: "sm" | "md";
+}
+
+const { technologies, class: className = "", size = "md" } = Astro.props;
+
+const normalizeIconName = (value: string) =>
+  value
+    .toLowerCase()
+    .replace(/^skill-icons:/, "")
+    .replace(/[^a-z0-9]+/g, "");
+
+const iconNames = Object.keys(skillIcons.icons);
+const iconBaseByNormalizedName = new Map<string, string>();
+
+for (const iconName of iconNames) {
+  const baseName = iconName.replace(/-(?:dark|light)$/, "");
+  iconBaseByNormalizedName.set(normalizeIconName(baseName), baseName);
+}
+
+const resolveIcon = (requestedName: string) => {
+  const normalizedRequest = requestedName
+    .trim()
+    .toLowerCase()
+    .replace(/^skill-icons:/, "");
+  const directIcon = skillIcons.icons[normalizedRequest];
+
+  if (directIcon) {
+    return { default: directIcon };
+  }
+
+  const baseName = iconBaseByNormalizedName.get(
+    normalizeIconName(normalizedRequest),
+  );
+
+  if (!baseName) return undefined;
+
+  const defaultIcon = skillIcons.icons[baseName];
+  const lightIcon = skillIcons.icons[`${baseName}-light`];
+  const darkIcon = skillIcons.icons[`${baseName}-dark`];
+
+  if (lightIcon && darkIcon) return { light: lightIcon, dark: darkIcon };
+  if (defaultIcon) return { default: defaultIcon };
+
+  return { default: lightIcon ?? darkIcon };
+};
+
+const normalizedTechnologies = technologies.map((technology) => {
+  const name = typeof technology === "string" ? technology : technology.name;
+  const requestedIcon =
+    typeof technology === "string" ? technology : technology.icon;
+
+  return {
+    name,
+    iconName: requestedIcon,
+    icons: resolveIcon(requestedIcon),
+  };
+});
+
+const labels = normalizedTechnologies.map(({ name }) => name);
+const itemSize = size === "sm" ? "h-8 w-8" : "h-10 w-10";
+const pixelSize = size === "sm" ? 32 : 40;
+const defaultWidth = skillIcons.width ?? 256;
+const defaultHeight = skillIcons.height ?? 256;
+
+const toDataUri = (icon: SkillIcon) => {
+  const width = icon.width ?? defaultWidth;
+  const height = icon.height ?? defaultHeight;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}">${icon.body}</svg>`;
+
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+};
+---
+
+<ul
+  class:list={["flex items-center gap-2", className]}
+  aria-label={`技术栈：${labels.join("、")}`}
+  data-tech-stack
+>
+  {
+    normalizedTechnologies.map(({ name, iconName, icons }) => (
+      <li class="flex shrink-0 items-center" title={name} data-icon={iconName}>
+        {icons?.light && icons.dark ? (
+          <>
+            <img
+              src={toDataUri(icons.light)}
+              alt=""
+              aria-hidden="true"
+              class:list={[itemSize, "rounded-[0.7rem] dark:hidden"]}
+              width={pixelSize}
+              height={pixelSize}
+              decoding="async"
+            />
+            <img
+              src={toDataUri(icons.dark)}
+              alt=""
+              aria-hidden="true"
+              class:list={[itemSize, "hidden rounded-[0.7rem] dark:block"]}
+              width={pixelSize}
+              height={pixelSize}
+              decoding="async"
+            />
+            <span class="sr-only">{name}</span>
+          </>
+        ) : icons?.default ? (
+          <>
+            <img
+              src={toDataUri(icons.default)}
+              alt=""
+              aria-hidden="true"
+              class:list={[itemSize, "rounded-[0.7rem]"]}
+              width={pixelSize}
+              height={pixelSize}
+              decoding="async"
+            />
+            <span class="sr-only">{name}</span>
+          </>
+        ) : (
+          <span
+            class:list={[
+              itemSize,
+              "inline-flex w-auto min-w-8 items-center justify-center rounded-xl border border-border bg-secondary px-2 font-mono text-xs text-secondary-foreground",
+            ]}
+          >
+            {name}
+          </span>
+        )}
+      </li>
+    ))
+  }
+</ul>

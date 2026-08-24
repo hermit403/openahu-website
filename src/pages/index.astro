@@ -4,68 +4,68 @@ import Hero from "../components/sections/Hero.astro";
 import ProjectCard from "../components/common/ProjectCard.astro";
 import MemberCard from "../components/common/MemberCard.astro";
 import { getCollection } from "astro:content";
-import { ahutongFallbackProject } from "../lib/projectFallback";
 
-const allProjects = await getCollection("projects");
-const allMembers = await getCollection("team");
-const projects = allProjects.length > 0 ? allProjects : [ahutongFallbackProject];
+const projects = await getCollection("projects");
+const allMembers = await getCollection("team", ({ data }) => data.published);
 ---
 
 <Layout title="OpenAHU - 开放 创新 协作">
-  <Hero cta={{ text: "了解更多", href: "/#projects" }} />
+  <Hero
+    cta={projects.length > 0
+      ? { text: "了解更多", href: "/#projects" }
+      : undefined}
+  />
 
-  <section id="projects" class="py-16 px-4">
-    <div
-      class="mx-auto w-[min(92%,72rem)] animate-fade-in opacity-0"
-      style="animation-delay: 0.8s; animation-fill-mode: forwards;"
-    >
-      <div class="mb-8 text-center">
-        <h2
-          class="text-3xl md:text-5xl font-bold tracking-tight text-foreground mb-4"
-        >
-          开源项目
-        </h2>
-        <br>
-      </div>
+  {
+    projects.length > 0 && (
+      <section id="projects" class="px-4 py-16">
+        <div class="mx-auto w-[min(92%,72rem)]">
+          <div class="mb-12 text-center">
+            <h2
+              class="text-3xl font-bold tracking-tight text-foreground md:text-5xl"
+              data-motion
+              data-motion-trigger="view"
+              data-motion-y="20"
+            >
+              开源项目
+            </h2>
+          </div>
 
-      <div
-        class="grid justify-center gap-6 [grid-template-columns:repeat(auto-fit,minmax(min(100%,20rem),20rem))]"
-      >
-        {
-          projects.map((project) => (
-            <div class="flex justify-center">
-              <ProjectCard project={project} />
-            </div>
-          ))
-        }
-      </div>
-    </div>
-  </section>
+          <div class="grid justify-center gap-6 [grid-template-columns:repeat(auto-fit,minmax(min(100%,20rem),20rem))]">
+            {projects.map((project) => (
+              <div class="flex justify-center">
+                <ProjectCard project={project} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
 
-  <section id="team" class="py-16 px-4">
-    <div
-      class="mx-auto w-[min(92%,72rem)] animate-fade-in opacity-0"
-      style="animation-delay: 1.0s; animation-fill-mode: forwards;"
-    >
-      <div class="mb-8 text-center">
-        <h2
-          class="text-3xl md:text-5xl font-bold tracking-tight text-foreground mb-4"
-        >
-          团队成员
-        </h2>
-        <br>
-      </div>
-      <div
-        class="grid justify-center gap-6 items-start [grid-template-columns:repeat(auto-fit,minmax(min(100%,16rem),16rem))]"
-      >
-        {
-          allMembers.map((member) => (
-            <div class="flex justify-center">
-              <MemberCard member={member} />
-            </div>
-          ))
-        }
-      </div>
-    </div>
-  </section>
+  {
+    allMembers.length > 0 && (
+      <section id="team" class="px-4 py-16">
+        <div class="mx-auto w-[min(92%,72rem)]">
+          <div class="mb-12 text-center">
+            <h2
+              class="text-3xl font-bold tracking-tight text-foreground md:text-5xl"
+              data-motion
+              data-motion-trigger="view"
+              data-motion-y="20"
+            >
+              团队成员
+            </h2>
+          </div>
+          <div class="grid items-start justify-center gap-6 [grid-template-columns:repeat(auto-fit,minmax(min(100%,16rem),16rem))]">
+            {allMembers.map((member) => (
+              <div class="flex justify-center">
+                <MemberCard member={member} />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
 </Layout>

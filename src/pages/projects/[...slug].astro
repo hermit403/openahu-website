@@ -3,57 +3,45 @@ import { getCollection, render } from "astro:content";
 import Layout from "../../layouts/Layout.astro";
 import Button from "../../components/ui/Button.astro";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
-import {
-  ahutongFallbackBodyHtml,
-  ahutongFallbackProject,
-} from "../../lib/projectFallback";
+import TechStack from "../../components/common/TechStack.astro";
 
 export async function getStaticPaths() {
   const projects = await getCollection("projects");
-  const projectEntries =
-    projects.length > 0 ? projects : [ahutongFallbackProject];
-
-  return projectEntries.map((project) => ({
+  return projects.map((project) => ({
     params: { slug: project.data.slug || project.id },
-    props: {
-      project,
-      fallbackBodyHtml:
-        project.id === ahutongFallbackProject.id && projects.length === 0
-          ? ahutongFallbackBodyHtml
-          : undefined,
-    },
+    props: { project },
   }));
 }
 
-const { project, fallbackBodyHtml } = Astro.props;
-const { title, desc, downloadUrl, techstack, screenshots, links } = project.data;
-const rendered = fallbackBodyHtml ? null : await render(project);
-const Content = rendered?.Content ?? null;
-
-const skillIconsUrl = `https://skillicons.dev/icons?i=${techstack.map((t) => t.toLowerCase().replace(/\s+/g, "")).join(",")}`;
+const { project } = Astro.props;
+const { title, desc, downloadUrl, techstack, screenshots, links } =
+  project.data;
+const { Content } = await render(project);
+const normalizedScreenshots = screenshots?.map((screenshot, index) =>
+  typeof screenshot === "string"
+    ? { src: screenshot, alt: `${title} 项目截图 ${index + 1}` }
+    : {
+        ...screenshot,
+        alt: screenshot.alt ?? `${title} 项目截图 ${index + 1}`,
+      },
+);
 ---
 
 <Layout title={`${title} - OpenAHU Project`}>
-  <div class="container mx-auto px-4 py-16 max-w-4xl">
+  <div class="container mx-auto max-w-4xl px-4 py-16">
     <Button variant="ghost" size="sm" href="/" class="mb-8">
       <ArrowLeftIcon className="mr-2 h-4 w-4" /> 返回首页
     </Button>
 
     <div class="flex flex-col gap-8">
-      <div class="space-y-4">
+      <div class="space-y-4" data-motion data-motion-y="20">
         <h1 class="text-4xl font-extrabold tracking-tight lg:text-5xl">
           {title}
         </h1>
         <p class="text-xl text-muted-foreground">{desc}</p>
 
         <div class="flex items-center gap-4 pt-4">
-          <img
-            src={skillIconsUrl}
-            alt="Tech Stack"
-            height="40"
-            class="h-10"
-            decoding="async"
-          />
+          <TechStack technologies={techstack} class="flex-wrap" />
         </div>
 
         <div class="flex flex-wrap gap-3 pt-4">
@@ -83,30 +71,34 @@ const skillIconsUrl = `https://skillicons.dev/icons?i=${techstack.map((t) => t.t
       </div>
 
       {
-        screenshots && screenshots.length > 0 && (
-          <div class="grid gap-4">
-            {screenshots.map((shot) => (
+        normalizedScreenshots && normalizedScreenshots.length > 0 && (
+          <div class="grid gap-5">
+            {normalizedScreenshots.map((shot) => (
               <img
-                src={shot}
-                alt={`Screenshot of ${title}`}
-                class="rounded-lg border border-border shadow-sm w-full"
+                src={shot.src}
+                alt={shot.alt}
+                width={shot.width}
+                height={shot.height}
+                class="w-full rounded-3xl border border-border shadow-sm"
                 decoding="async"
                 loading="lazy"
+                data-motion
+                data-motion-trigger="view"
+                data-motion-y="24"
               />
             ))}
           </div>
         )
       }
 
-      {
-        fallbackBodyHtml ? (
-          <div class="markdown-content max-w-none" set:html={fallbackBodyHtml} />
-        ) : Content ? (
-          <div class="markdown-content max-w-none">
-            <Content />
-          </div>
-        ) : null
-      }
+      <div
+        class="markdown-content max-w-none"
+        data-motion
+        data-motion-trigger="view"
+        data-motion-y="20"
+      >
+        <Content />
+      </div>
     </div>
   </div>
 </Layout>

@@ -1,0 +1,26 @@
+diff --git a/dist/index.esm.js b/dist/index.esm.js
+index 98375df2cc8d6b9027a8bf4d90fdd2db6dedc952..b38887037351b40887c1c80d6a952ee4d5bea67d 100644
+--- a/dist/index.esm.js
++++ b/dist/index.esm.js
+@@ -138,7 +138,7 @@ var GlassFilter = ({
+     /* @__PURE__ */ jsx("stop", { offset: "100%", stopColor: "white", stopOpacity: "1" })
+   ] }),
+   /* @__PURE__ */ jsxs("filter", { id, x: "-35%", y: "-35%", width: "170%", height: "170%", colorInterpolationFilters: "sRGB", children: [
+-    /* @__PURE__ */ jsx("feImage", { id: "feimage", x: "0", y: "0", width: "100%", height: "100%", result: "DISPLACEMENT_MAP", href: getMap(mode, shaderMapUrl), preserveAspectRatio: "xMidYMid slice" }),
++    /* @__PURE__ */ jsx("feImage", { x: "0", y: "0", width: "100%", height: "100%", result: "DISPLACEMENT_MAP", href: getMap(mode, shaderMapUrl), preserveAspectRatio: "xMidYMid slice" }),
+     /* @__PURE__ */ jsx(
+       "feColorMatrix",
+       {
+diff --git a/dist/index.js b/dist/index.js
+index 5ff1dce67e4a718ed10a76391a34b20b6faf2e57..c76e09dba130d6073454f2a391cbbd49eafd1df4 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -162,7 +162,7 @@ var GlassFilter = ({
+     /* @__PURE__ */ (0, import_jsx_runtime.jsx)("stop", { offset: "100%", stopColor: "white", stopOpacity: "1" })
+   ] }),
+   /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("filter", { id, x: "-35%", y: "-35%", width: "170%", height: "170%", colorInterpolationFilters: "sRGB", children: [
+-    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("feImage", { id: "feimage", x: "0", y: "0", width: "100%", height: "100%", result: "DISPLACEMENT_MAP", href: getMap(mode, shaderMapUrl), preserveAspectRatio: "xMidYMid slice" }),
++    /* @__PURE__ */ (0, import_jsx_runtime.jsx)("feImage", { x: "0", y: "0", width: "100%", height: "100%", result: "DISPLACEMENT_MAP", href: getMap(mode, shaderMapUrl), preserveAspectRatio: "xMidYMid slice" }),
+     /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+       "feColorMatrix",
+       {

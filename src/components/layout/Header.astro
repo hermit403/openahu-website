@@ -8,27 +8,35 @@ import LiquidContainer from "../ui/LiquidContainer";
 
 <header
   class="sticky top-4 z-50 mt-4 mx-auto w-[min(92%,64rem)] transition-all duration-300"
+  transition:persist="site-header"
 >
   <LiquidContainer
-    client:idle
+    client:load
     variant="pill"
     fill
-    interactive={false}
-    className="h-12 rounded-2xl"
+    interactive
+    elasticity={0.18}
+    radius={28}
+    className="h-14 rounded-[1.75rem]"
     padding="0"
   >
-    <div class="flex h-full w-full items-center justify-between px-6">
-      <div class="mr-4 flex flex-shrink-0">
+    <div class="flex h-full w-full items-center justify-between px-3 sm:px-6">
+      <div class="mr-1 flex flex-shrink-0 sm:mr-4">
         <Logo />
       </div>
-      <div class="flex flex-1 items-center justify-end space-x-4 min-w-0">
+      <div
+        class="flex min-w-0 flex-1 items-center justify-end space-x-0 sm:space-x-4"
+      >
         <Navigation />
-        <nav class="flex items-center space-x-1 flex-shrink-0 z-50 relative">
+        <nav
+          class="relative z-50 flex flex-shrink-0 items-center space-x-1"
+          aria-label="外部链接与显示设置"
+        >
           <a
             href="https://github.com/OpenAHU"
             target="_blank"
             rel="noreferrer"
-            class="w-10 h-12 inline-flex items-center justify-center rounded-md hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+            class="inline-flex h-11 w-11 items-center justify-center rounded-full transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-foreground/20 dark:hover:bg-white/10"
           >
             <GitHubLogoIcon className="w-5 h-5" />
             <span class="sr-only">GitHub</span>

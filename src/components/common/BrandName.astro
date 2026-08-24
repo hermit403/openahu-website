@@ -1,0 +1,12 @@
+---
+interface Props {
+  gradient?: boolean;
+  class?: string;
+}
+
+const { gradient = false, class: className } = Astro.props;
+---
+
+<span class:list={["brand-wordmark", gradient && "brand-spectrum", className]}
+  >OpenAHU</span
+>

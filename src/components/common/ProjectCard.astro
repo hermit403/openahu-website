@@ -3,6 +3,7 @@ import { type CollectionEntry } from "astro:content";
 import Button from "../ui/Button.astro";
 import { GitHubLogoIcon } from "@radix-ui/react-icons";
 import LiquidContainer from "../ui/LiquidContainer";
+import TechStack from "./TechStack.astro";
 
 interface Props {
   project: CollectionEntry<"projects">;
@@ -11,27 +12,37 @@ interface Props {
 const { project } = Astro.props;
 const { title, desc, techstack, links } = project.data;
 const slug = project.data.slug || project.id;
-const skillIconsUrl = `https://skillicons.dev/icons?i=${techstack.map((t) => t.toLowerCase().replace(/\s+/g, "")).join(",")}`;
+const githubLink = links.find((link) => link.name === "GitHub");
 ---
 
 <div
-  class="group relative rounded-xl font-sans w-full max-w-sm"
+  class="liquid-card-frame group relative w-full max-w-sm rounded-[1.75rem] font-sans"
+  data-motion
+  data-motion-trigger="view"
+  data-motion-y="24"
 >
   <LiquidContainer
     client:visible
     fill
-    className="w-full rounded-xl"
-    radius={12}
+    className="w-full rounded-[1.75rem]"
+    radius={28}
+    elasticity={0.32}
   >
-    <div class="flex flex-col gap-4 relative z-10">
-      <div class="flex items-center justify-between">
-        <h3 class="text-2xl font-bold tracking-tight">{title}</h3>
+    <div class="relative z-10 flex flex-col gap-3.5">
+      <div class="flex items-start justify-between gap-3">
+        <h3
+          class="min-w-0 break-words text-2xl font-bold leading-tight tracking-tight"
+        >
+          {title}
+        </h3>
         {
-          links.find((l) => l.name === "GitHub") && (
+          githubLink && (
             <a
-              href={links.find((l) => l.name === "GitHub")?.url}
+              href={githubLink.url}
               target="_blank"
-              class="text-muted-foreground hover:text-foreground z-10 relative transition-colors"
+              rel="noreferrer"
+              aria-label={`${title} 的 GitHub 仓库`}
+              class="relative z-10 inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-black/5 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:hover:bg-white/10"
             >
               <GitHubLogoIcon className="h-5 w-5" />
             </a>
@@ -39,22 +50,17 @@ const skillIconsUrl = `https://skillicons.dev/icons?i=${techstack.map((t) => t.t
         }
       </div>
 
-      <p class="text-muted-foreground line-clamp-3 min-h-[3rem]">
+      <p class="text-pretty leading-relaxed text-muted-foreground">
         {desc}
       </p>
 
-      <div class="mt-2 h-10">
-        <img
-          src={skillIconsUrl}
-          alt="Tech Stack"
-          class="h-full object-contain object-left"
-          height="40"
-          decoding="async"
-          loading="lazy"
-        />
+      <div
+        class="mt-1.5 h-10 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        <TechStack technologies={techstack} />
       </div>
 
-      <div class="mt-4 flex gap-2 pt-2">
+      <div class="mt-3 flex gap-2 pt-1.5">
         <Button
           variant="outline"
           size="sm"

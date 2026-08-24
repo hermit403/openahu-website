@@ -1,16 +1,21 @@
----
----
-
-<a href="/" class="flex items-center gap-2 group">
+<a
+  href="/"
+  aria-label="返回 OpenAHU 首页"
+  class="group flex min-h-11 min-w-0 items-center justify-start gap-1.5 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:gap-2"
+>
   <img
     src="/favicon.png"
-    alt="AHUTong Logo"
-    class="h-6 w-6 object-contain"
+    alt=""
+    aria-hidden="true"
+    class="hidden h-6 w-6 rounded-lg object-contain sm:block"
     width="28"
     height="28"
     decoding="async"
     loading="eager"
     fetchpriority="high"
   />
-  <span class="hidden font-bold sm:inline-block">OpenAHU</span>
+  <span
+    class="brand-wordmark inline-block whitespace-nowrap text-sm sm:text-base"
+    >OpenAHU</span
+  >
 </a>
