@@ -14,8 +14,10 @@ const currentPath = normalizePath(Astro.url.pathname);
   aria-label="主导航"
   data-route-nav
 >
-  <span class="route-nav__indicator" data-route-indicator aria-hidden="true"
-  ></span>
+  <span class="route-nav__indicator" data-route-indicator aria-hidden="true">
+    <span class="route-nav__indicator-surface" data-route-indicator-surface
+    ></span>
+  </span>
   {
     navItems.map((item) => {
       const isActive = currentPath === item.href;
@@ -24,11 +26,12 @@ const currentPath = normalizePath(Astro.url.pathname);
         <a
           href={item.href}
           aria-current={isActive ? "page" : undefined}
+          draggable="false"
           data-route-link
           data-route-path={item.href}
           data-astro-prefetch="viewport"
           class:list={[
-            "route-nav__link relative z-10 inline-flex min-h-11 items-center rounded-[0.9rem] px-2.5 text-sm text-foreground/60 transition-colors hover:text-foreground/85 sm:px-3 sm:text-base",
+            "route-nav__link relative z-10 inline-flex min-h-11 items-center rounded-2xl px-2.5 text-sm text-foreground/60 transition-colors hover:text-foreground/85 sm:px-3 sm:text-base",
             "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-foreground/20",
           ]}
         >
@@ -37,4 +40,6 @@ const currentPath = normalizePath(Astro.url.pathname);
       );
     })
   }
+  <span class="route-nav__drag-handle" data-route-drag-handle aria-hidden="true"
+  ></span>
 </nav>

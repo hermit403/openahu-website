@@ -1,6 +1,9 @@
 import { animate } from "animejs/animation";
+import { createDraggable, type Draggable } from "animejs/draggable";
 import { cubicBezier } from "animejs/easings/cubic-bezier";
+import { spring } from "animejs/easings/spring";
 import { navigate } from "astro:transitions/client";
+import { emitLiquidMotion } from "../lib/liquidMotion";
 
 type IndicatorState = {
   x: number;
@@ -16,6 +19,7 @@ const reducedMotion = window.matchMedia(
 ).matches;
 const indicatorStates = new WeakMap<HTMLElement, IndicatorState>();
 const indicatorAnimations = new WeakMap<HTMLElement, IndicatorAnimation>();
+const indicatorDraggables = new WeakMap<HTMLElement, Draggable>();
 
 const normalizePath = (path: string) =>
   path === "/" ? path : path.replace(/\/+$/, "");
@@ -50,9 +54,124 @@ const updateCurrentState = (
     });
 };
 
-const renderIndicator = (indicator: HTMLElement, state: IndicatorState) => {
-  indicator.style.width = `${state.width}px`;
-  indicator.style.transform = `translate3d(${state.x}px, 0, 0) scaleX(1)`;
+const getIndicatorParts = (nav: HTMLElement) => ({
+  indicator: nav.querySelector<HTMLElement>("[data-route-indicator]"),
+  surface: nav.querySelector<HTMLElement>("[data-route-indicator-surface]"),
+  dragHandle: nav.querySelector<HTMLElement>("[data-route-drag-handle]"),
+});
+
+const renderIndicator = (
+  indicator: HTMLElement,
+  dragHandle: HTMLElement,
+  state: IndicatorState,
+) => {
+  [indicator, dragHandle].forEach((element) => {
+    element.style.width = `${state.width}px`;
+    element.style.transform = `translate3d(${state.x}px, 0, 0) scaleX(1)`;
+  });
+};
+
+const clearDragState = (nav: HTMLElement) => {
+  delete nav.dataset.indicatorDragging;
+  delete nav.dataset.indicatorSettling;
+};
+
+const resistDrag = (limit: number) => (value: number) => {
+  const distance = Math.abs(value);
+  return Math.sign(value) * limit * (1 - Math.exp(-distance / limit));
+};
+
+const suspendIndicatorDrag = (nav: HTMLElement) => {
+  const draggable = indicatorDraggables.get(nav);
+  if (!draggable) return;
+
+  draggable.reset();
+  if (draggable.enabled) draggable.disable();
+  clearDragState(nav);
+};
+
+const resumeIndicatorDrag = (nav: HTMLElement) => {
+  const draggable = indicatorDraggables.get(nav);
+  if (!draggable) return;
+
+  draggable.refresh();
+  if (!draggable.enabled) draggable.enable();
+};
+
+const setupIndicatorDrag = (nav: HTMLElement) => {
+  if (reducedMotion || indicatorDraggables.has(nav)) return;
+
+  const { surface, dragHandle } = getIndicatorParts(nav);
+  if (!surface || !dragHandle) return;
+
+  const draggable = createDraggable(surface, {
+    trigger: dragHandle,
+    x: { snap: [0], modifier: resistDrag(16) },
+    y: { snap: [0], modifier: resistDrag(6) },
+    dragSpeed: 1,
+    dragThreshold: { mouse: 3, touch: 7 },
+    velocityMultiplier: 0,
+    releaseEase: spring({
+      stiffness: 900,
+      damping: 12,
+    }),
+    cursor: false,
+    onGrab: () => {
+      delete nav.dataset.indicatorSettling;
+      nav.dataset.indicatorDragging = "";
+    },
+    onRelease: (released) => {
+      delete nav.dataset.indicatorDragging;
+      if (Math.hypot(released.x, released.y) < 0.1) {
+        clearDragState(nav);
+      } else {
+        nav.dataset.indicatorSettling = "";
+      }
+    },
+    onSettle: () => {
+      clearDragState(nav);
+    },
+  });
+
+  const forwardActiveLinkPress = (event: MouseEvent | TouchEvent) => {
+    if (!draggable.enabled || !(event.target instanceof Element)) return;
+
+    const activeLink = event.target.closest<HTMLAnchorElement>(
+      "[data-route-link][aria-current='page']",
+    );
+    if (!activeLink || !nav.contains(activeLink)) return;
+
+    event.preventDefault();
+    draggable.handleDown(event);
+  };
+
+  const preventNativeLinkGesture = (event: Event) => {
+    if (!(event.target instanceof Element)) return;
+    if (
+      event.target.closest(
+        "[data-route-drag-handle], [data-route-link][aria-current='page']",
+      )
+    ) {
+      event.preventDefault();
+    }
+  };
+
+  nav.addEventListener("mousedown", forwardActiveLinkPress, {
+    capture: true,
+  });
+  nav.addEventListener("touchstart", forwardActiveLinkPress, {
+    capture: true,
+    passive: false,
+  });
+  nav.addEventListener("dragstart", preventNativeLinkGesture, {
+    capture: true,
+  });
+  nav.addEventListener("contextmenu", preventNativeLinkGesture, {
+    capture: true,
+  });
+
+  indicatorDraggables.set(nav, draggable);
+  nav.dataset.indicatorDraggable = "";
 };
 
 const moveIndicator = (
@@ -61,8 +180,8 @@ const moveIndicator = (
   shouldAnimate: boolean,
   onSettled?: () => void,
 ) => {
-  const indicator = nav.querySelector<HTMLElement>("[data-route-indicator]");
-  if (!indicator) return;
+  const { indicator, dragHandle } = getIndicatorParts(nav);
+  if (!indicator || !dragHandle) return;
 
   const target = {
     x: activeLink.offsetLeft,
@@ -75,8 +194,10 @@ const moveIndicator = (
   if (!current || reducedMotion || !shouldAnimate) {
     indicatorAnimations.get(nav)?.cancel();
     indicatorAnimations.delete(nav);
+    indicatorDraggables.get(nav)?.reset();
     indicatorStates.set(nav, target);
-    renderIndicator(indicator, target);
+    renderIndicator(indicator, dragHandle, target);
+    resumeIndicatorDrag(nav);
     nav.dataset.indicatorReady = "";
     onSettled?.();
     return;
@@ -86,7 +207,11 @@ const moveIndicator = (
     Math.abs(current.x - target.x) < 0.5 &&
     Math.abs(current.width - target.width) < 0.5
   ) {
-    if (!indicatorAnimations.has(nav)) renderIndicator(indicator, target);
+    if (!indicatorAnimations.has(nav)) {
+      indicatorDraggables.get(nav)?.reset();
+      renderIndicator(indicator, dragHandle, target);
+      resumeIndicatorDrag(nav);
+    }
     onSettled?.();
     return;
   }
@@ -97,16 +222,21 @@ const moveIndicator = (
   const fromScaleX = Math.max(0.72, currentRect.width / target.width);
   const distance = target.x - fromX;
   const stretch = 1 + Math.min(0.095, Math.abs(distance) / 720);
+  const stickyPull =
+    Math.sign(distance) * Math.min(28, Math.abs(distance) * 0.42);
 
   indicatorAnimations.get(nav)?.cancel();
-  indicator.style.width = `${target.width}px`;
-  indicator.style.transformOrigin =
-    distance >= 0 ? "left center" : "right center";
-  indicator.style.transform = `translate3d(${fromX}px, 0, 0) scaleX(${fromScaleX})`;
+  suspendIndicatorDrag(nav);
+  [indicator, dragHandle].forEach((element) => {
+    element.style.width = `${target.width}px`;
+    element.style.transformOrigin =
+      distance >= 0 ? "left center" : "right center";
+    element.style.transform = `translate3d(${fromX}px, 0, 0) scaleX(${fromScaleX})`;
+  });
   indicatorStates.set(nav, target);
   nav.dataset.indicatorReady = "";
 
-  const animation = animate(indicator, {
+  const animation = animate([indicator, dragHandle], {
     x: {
       from: fromX,
       to: target.x,
@@ -127,21 +257,50 @@ const moveIndicator = (
       },
     ],
     onComplete: () => {
-      renderIndicator(indicator, target);
+      renderIndicator(indicator, dragHandle, target);
       indicator.style.transformOrigin = "left center";
+      dragHandle.style.transformOrigin = "left center";
       indicatorAnimations.delete(nav);
+      resumeIndicatorDrag(nav);
       onSettled?.();
     },
   });
 
-  indicatorAnimations.set(nav, animation);
+  const stickyMotion = { x: 0 };
+  const stickyAnimation = animate(stickyMotion, {
+    x: [
+      {
+        to: stickyPull,
+        duration: 130,
+        ease: cubicBezier(0.22, 0.7, 0.24, 1),
+      },
+      {
+        to: stickyPull * 0.12,
+        duration: 230,
+        ease: cubicBezier(0.3, 0.02, 0.2, 1),
+      },
+    ],
+    onUpdate: () => emitLiquidMotion(nav, { x: stickyMotion.x }),
+    onComplete: () => emitLiquidMotion(nav, { release: true }),
+  });
+
+  indicatorAnimations.set(nav, {
+    cancel: () => {
+      animation.cancel();
+      stickyAnimation.cancel();
+      emitLiquidMotion(nav, { release: true });
+    },
+  });
 };
 
 const refreshNavigation = (shouldAnimate: boolean) => {
   document.querySelectorAll<HTMLElement>("[data-route-nav]").forEach((nav) => {
     if (nav.closest("[inert]")) return;
     const activeLink = getCurrentLink(nav);
-    if (activeLink) moveIndicator(nav, activeLink, shouldAnimate);
+    if (!activeLink) return;
+
+    moveIndicator(nav, activeLink, shouldAnimate);
+    setupIndicatorDrag(nav);
   });
 };
 

@@ -274,10 +274,19 @@ main th {
   left: 0;
   z-index: 0;
   width: 0;
+  opacity: 0;
+  backface-visibility: hidden;
+  pointer-events: none;
+  transform-origin: left center;
+  will-change: transform;
+}
+
+.route-nav__indicator-surface {
+  position: absolute;
+  inset: 0;
   overflow: hidden;
   border: 1px solid color-mix(in srgb, white 34%, transparent);
-  border-radius: 1rem;
-  opacity: 0;
+  border-radius: 1.125rem;
   background:
     linear-gradient(145deg, rgb(255 255 255 / 22%), transparent 52%),
     color-mix(in srgb, var(--foreground) 4.25%, transparent);
@@ -288,11 +297,10 @@ main th {
   backface-visibility: hidden;
   contain: paint;
   pointer-events: none;
-  transform-origin: left center;
-  will-change: transform;
+  will-change: transform, filter;
 }
 
-.route-nav__indicator::before {
+.route-nav__indicator-surface::before {
   position: absolute;
   inset: 1px;
   border-radius: inherit;
@@ -304,6 +312,38 @@ main th {
   );
   content: "";
   pointer-events: none;
+}
+
+.route-nav__drag-handle {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  z-index: 20;
+  width: 0;
+  border-radius: 1.125rem;
+  background: rgb(0 0 0 / 0.001%);
+  cursor: grab;
+  pointer-events: none;
+  touch-action: none;
+  transform-origin: left center;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  will-change: transform;
+}
+
+.route-nav[data-indicator-ready][data-indicator-draggable]
+  .route-nav__drag-handle {
+  pointer-events: auto;
+}
+
+.route-nav[data-indicator-dragging] .route-nav__drag-handle {
+  cursor: grabbing;
+  pointer-events: auto !important;
+}
+
+.route-nav[data-indicator-dragging] .route-nav__indicator-surface {
+  filter: saturate(1.08) brightness(1.015);
 }
 
 .route-nav[data-indicator-ready] .route-nav__indicator {
@@ -319,7 +359,7 @@ main th {
   box-shadow: 0 5px 14px rgb(24 24 27 / 4.5%);
 }
 
-.dark .route-nav__indicator {
+.dark .route-nav__indicator-surface {
   border-color: rgb(255 255 255 / 9%);
   background:
     linear-gradient(145deg, rgb(255 255 255 / 8%), transparent 55%),
@@ -377,9 +417,9 @@ main th {
       )
       98%
   );
-  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .liquid-surface .glass {

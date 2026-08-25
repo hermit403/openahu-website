@@ -15,7 +15,9 @@ import LiquidContainer from "../ui/LiquidContainer";
     variant="pill"
     fill
     interactive
-    elasticity={0.18}
+    interactionMode="hover-press"
+    interactionTarget="[data-route-drag-handle], [data-route-link][aria-current='page']"
+    elasticity={0.06}
     radius={28}
     className="h-14 rounded-[1.75rem]"
     padding="0"
