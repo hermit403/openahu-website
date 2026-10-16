@@ -18,7 +18,7 @@ DEPLOY_PATH → 新 release
 
 每次部署创建不可变 release，文件全部解压后才切换站点软链接。构建、上传或解压失败不会覆盖当前线上版本。同一次 workflow 的重试通过 `GITHUB_RUN_ATTEMPT` 获得不同目录。
 
-切换前会确认首页与关于页产物存在；切换后会从公网请求这两个路由。任一路由不可访问时，工作流会失败并保留日志供排查。
+切换前会确认首页、关于页、安大通项目页、自签教程、更新日志与 waitlist 产物存在；切换后会从公网请求这六个路由。任一路由不可访问时，工作流会失败并保留日志供排查。
 
 ## GitHub Environment
 
@@ -32,6 +32,13 @@ DEPLOY_PATH → 新 release
 | Secret   | `DEPLOY_SSH_KEY`     | 专用 Ed25519 私钥                               |
 | Secret   | `DEPLOY_KNOWN_HOSTS` | 经可信渠道核验的服务器 host key                 |
 | Variable | `DEPLOY_PATH`        | 当前版本软链接，例如 `/var/www/openahu/current` |
+
+申请表与 IPA 的可选公开地址同样通过 `production` Environment Variables 配置：
+
+- `PUBLIC_IOS_WAITLIST_FORM_URL`：外部收集表的完整 HTTPS 链接。留空时显示“申请入口即将开放”。
+- `PUBLIC_AHUTONG_IOS_IPA_URL`：公开 IPA 下载地址。留空时引导用户了解体验计划。
+
+修改这两项后需要重新部署静态站点，不能放入密码、证书或私密下载令牌。
 
 可以为 `production` 增加 required reviewers，避免未经确认的生产部署。
 

@@ -9,7 +9,7 @@ screenshots:
     height: 846
 techstack:
   - "Kotlin"
-  - "Java"
+  - "Swift"
   - "Rust"
   - name: "Android"
     icon: "androidstudio"
@@ -18,17 +18,21 @@ links:
     url: "https://github.com/OpenAHU/AHUTong"
 ---
 
-安大通是一款专为安徽大学师生设计的校园生活服务应用。它集成了校园卡服务、教务系统查询（课表、成绩、考试）、生活缴费等功能。项目采用现代化的 Android 技术栈开发。
+安大通是一款专为安徽大学师生设计的校园生活服务应用。它集成了校园卡服务、教务系统查询（课表、成绩、考试）、生活缴费等功能。Android 与 iOS 客户端分别使用原生技术构建，共享 Rust 校园数据能力。
 
-安大通正在建设 AIO（All in One）仓库，用于统一管理不同平台的客户端。目前仓库已接入 Android、HarmonyOS 和 iOS 子仓。
+安大通正在建设 AIO（All in One）仓库，用于统一管理不同平台的客户端。目前仓库已接入 Android、HarmonyOS、iOS 和 macOS 子仓。
 
 Android 客户端采用 MVVM 架构，UI 使用 Jetpack Compose 和 Material 3，以 Kotlin 为主并包含少量 Java 代码；核心校园数据能力由 Rust SDK 提供，经 JNI 接入 Android，并使用 Tokio、Axum 和 Reqwest 实现本地服务及网络访问。
 
-HarmonyOS 客户端预计使用 ArkTS 和 ArkUI，iOS 客户端预计使用 Swift 和 SwiftUI。
+iOS 客户端使用 Swift 和 SwiftUI，支持课表、校园卡等功能，安装需要签名。可以阅读 [iOS 自签教程](/projects/ahutong/ios/)，或了解 [团队签名体验计划](/waitlist/)。HarmonyOS 与 macOS 客户端进展以各平台仓库为准。
 
 同时，基于 Tauri 的 AHUTong-Tauri 正在规划中，一套代码，多端适配（Android/iOS/...）
 
-## Changelogs
+## 近期版本
+
+新增 Android 3.3.0、3.4.0、3.4.1 与 3.4.2 的版本记录，以及 iOS 1.0.0 的弱网与课表修复预览。前往 [更新日志](/projects/ahutong/changelog/) 查看完整说明与来源。
+
+<h2 id="history">历史更新 · Android 3.2.2 及更早版本</h2>
 
 ### v3.2.2
 

@@ -4,6 +4,7 @@ import { cubicBezier } from "animejs/easings/cubic-bezier";
 import { spring } from "animejs/easings/spring";
 import { navigate } from "astro:transitions/client";
 import { emitLiquidMotion } from "../lib/liquidMotion";
+import { navigationSection } from "../lib/navigationPath";
 
 type IndicatorState = {
   x: number;
@@ -25,7 +26,7 @@ const normalizePath = (path: string) =>
   path === "/" ? path : path.replace(/\/+$/, "");
 
 const getCurrentLink = (nav: HTMLElement) => {
-  const currentPath = normalizePath(window.location.pathname);
+  const currentPath = navigationSection(window.location.pathname);
   const links = Array.from(
     nav.querySelectorAll<HTMLAnchorElement>("[data-route-link]"),
   );

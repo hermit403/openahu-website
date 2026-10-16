@@ -8,10 +8,11 @@ import LiquidContainer from "../ui/LiquidContainer";
 
 <header
   class="sticky top-4 z-50 mt-4 mx-auto w-[min(92%,64rem)] transition-all duration-300"
-  transition:persist="site-header"
 >
   <LiquidContainer
     client:load
+    transition:persist="site-header"
+    transition:persist-props
     variant="pill"
     fill
     interactive
@@ -38,7 +39,7 @@ import LiquidContainer from "../ui/LiquidContainer";
             href="https://github.com/OpenAHU"
             target="_blank"
             rel="noreferrer"
-            class="inline-flex h-11 w-11 items-center justify-center rounded-full transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-foreground/20 dark:hover:bg-white/10"
+            class="hidden h-11 w-11 items-center justify-center rounded-full transition-colors hover:bg-black/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-foreground/20 min-[400px]:inline-flex dark:hover:bg-white/10"
           >
             <GitHubLogoIcon className="w-5 h-5" />
             <span class="sr-only">GitHub</span>

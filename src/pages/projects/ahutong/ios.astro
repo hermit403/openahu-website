@@ -1,0 +1,186 @@
+---
+import AhutongLayout from "../../../layouts/AhutongLayout.astro";
+import Button from "../../../components/ui/Button.astro";
+import { ahutong } from "../../../config/ahutong";
+const sections = [
+  ["prepare", "安装前准备"],
+  ["install", "连接、签名与安装"],
+  ["trust", "第一次打开"],
+  ["renew", "续签与更新"],
+  ["faq", "常见问题"],
+];
+---
+
+<AhutongLayout
+  title="把安大通装进 iPhone。"
+  description="使用 Sideloadly 和你自己的 Apple 账号，为安大通 IPA 签名并安装。这份指南适用于 iPhone 与 iPad。"
+  eyebrow="Install guide · Sideloadly"
+>
+  <div slot="actions" class="ahutong-actions">
+    <Button
+      href="https://sideloadly.io/"
+      target="_blank"
+      rel="noopener noreferrer">下载 Sideloadly ↗</Button
+    >
+    {
+      ahutong.iosIpaUrl ? (
+        <Button
+          variant="outline"
+          href={ahutong.iosIpaUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          下载安大通 IPA ↗
+        </Button>
+      ) : (
+        <Button variant="outline" href="/waitlist/">
+          了解 IPA 体验计划
+        </Button>
+      )
+    }
+  </div>
+  <div class="ahutong-reading">
+    <article class="ahutong-article markdown-content">
+      <div class="ahutong-note">
+        免费 Apple 账号的签名通常有效 7 天，每台设备最多同时安装 3
+        个此类自签应用。提前完成续签，可以减少到期后无法打开的情况。安大通要求
+        iOS / iPadOS {ahutong.iosMinimumVersion} 或更新版本。
+      </div>
+      <h2 id="prepare">01 · 安装前准备</h2>
+      <ul>
+        <li>一台 Windows 或 macOS 电脑，以及可传输数据的数据线。</li>
+        <li>一台 iOS / iPadOS 17 及以上的设备，安装期间保持解锁。</li>
+        <li>
+          你自己的 Apple 账号，以及从 OpenAHU 获取的安大通 <code>.ipa</code> 安装包。
+        </li>
+      </ul>
+      {
+        !ahutong.iosIpaUrl && (
+          <p>
+            IPA
+            将随测试邀请提供。已取得安装包的用户可以继续下面的步骤；尚未取得安装包，可以先了解
+            <a href="/waitlist/">体验计划</a>。
+          </p>
+        )
+      }
+      <h3>先装好电脑端工具</h3>
+      <p>
+        从 <a
+          href="https://sideloadly.io/"
+          target="_blank"
+          rel="noopener noreferrer">Sideloadly 官网</a
+        >选择与你的系统对应的版本。Windows 用户还需要官网列出的网页版 iTunes 和
+        iCloud；按官方说明处理与 Microsoft Store 版本的兼容问题。macOS 用户可在
+        Finder 中确认设备连接。
+      </p>
+      <h2 id="install">02 · 连接、签名与安装</h2>
+      <ol>
+        <li>
+          <strong>连接设备。</strong>用数据线连接电脑，解锁 iPhone /
+          iPad，在设备提示时选择“信任此电脑”。
+        </li>
+        <li>
+          <strong>选择手机。</strong>打开 Sideloadly，在 <code>iDevice</code> 中确认选中的是你的
+          iPhone / iPad；Apple Silicon Mac 用户尤其注意不要误选电脑。
+        </li>
+        <li>
+          <strong>载入安大通 IPA。</strong>把 <code>.ipa</code> 文件拖入 Sideloadly，或点击
+          IPA 图标选择文件。
+        </li>
+        <li>
+          <strong>填写账号。</strong>在 <code>Apple ID</code> 中填写你自己的 Apple
+          账号。账号密码和双重认证验证码按电脑端工具提示输入，无需提交给 OpenAHU。
+        </li>
+        <li>
+          <strong>开始安装。</strong>点击 <code>Start</code
+          >，等待工具完成签名与安装。出现 <code>Done.</code> 后，再在手机上完成首次运行设置。
+        </li>
+      </ol>
+      <h2 id="trust">03 · 第一次打开</h2>
+      <p>
+        如果出现“不受信任的开发者”，打开手机的<strong
+          >设置 → 通用 → VPN 与设备管理</strong
+        >，选择本次自签使用的账号并完成信任。
+      </p>
+      <p>
+        如提示需要开发者模式，前往<strong
+          >设置 → 隐私与安全性 → 开发者模式</strong
+        >，按系统要求开启、重启并再次确认。入口暂时没有出现时，先完成一次电脑端安装，再回到设置检查。
+      </p>
+      <p>返回主屏幕，打开安大通，阅读隐私说明后选择登录或使用体验账户。</p>
+      <h2 id="renew">04 · 续签与更新</h2>
+      <p>
+        免费账号需要在签名到期前重新签名。最直接的方法是连接设备，使用<strong
+          >同一个 Apple 账号和相同的应用标识</strong
+        >再次安装；升级时选择新版 IPA。尽量覆盖安装，卸载可能清除本地数据。
+      </p>
+      <p>
+        Sideloadly 支持自动续签：开启应用的自动刷新选项，并让电脑上的 Sideloadly
+        Daemon 运行。设备需要通过 USB 连接，或已配对且与电脑处于同一
+        Wi-Fi；只有手机联网并不足以保证续签成功。具体设置见<a
+          href="https://sideloadly.io/faq"
+          target="_blank"
+          rel="noopener noreferrer">官方 FAQ</a
+        >。
+      </p>
+      <h2 id="faq">05 · 常见问题</h2>
+      <details class="ahutong-faq">
+        <summary>电脑识别不到手机怎么办？</summary><p>
+          先解锁设备并确认信任电脑，更换可传输数据的数据线或 USB 接口。Windows
+          检查官方要求的 iTunes / iCloud 组件；macOS 先在 Finder
+          中确认能看到设备。
+        </p>
+      </details>
+      <details class="ahutong-faq">
+        <summary>提示 App ID 或应用数量达到上限？</summary><p>
+          免费账号有应用数量和 App ID 配额限制，Widget 等扩展也会使用 App
+          ID。根据工具提示等待配额恢复，或整理不再使用的自签应用；反复重试不会立即重置配额。
+        </p>
+      </details>
+      <details class="ahutong-faq">
+        <summary>Widget 或 App Group 签名失败怎么办？</summary><p>
+          安大通 IPA 包含课表 Widget。扩展和 App Group
+          能否保留取决于你的账号及签名能力。若扩展导致安装失败，可以在
+          Sideloadly 的扩展移除选项中移除 Widget
+          后安装主应用；这样将无法使用桌面课表组件。
+        </p>
+      </details>
+      <details class="ahutong-faq">
+        <summary>安装成功，几天后又打不开了？</summary><p>
+          先检查签名是否到期，用原 Apple
+          账号和相同应用标识重新签名、覆盖安装。仍失败时，记录 Sideloadly
+          的错误提示并反馈给团队，注意隐藏账号等个人信息。
+        </p>
+      </details>
+      <details class="ahutong-faq">
+        <summary>只想用手机安装，可以吗？</summary><p>
+          本教程需要电脑。希望参加团队签名体验，可以关注 <a href="/waitlist/"
+            >waitlist</a
+          >，获邀后按设备登记与安装说明操作。
+        </p>
+      </details>
+      <h2>参考资料</h2>
+      <p>
+        本教程参考 <a
+          href="https://kazumi.app/docs/misc/how-to-install-in-ios/"
+          target="_blank"
+          rel="noopener noreferrer">Kazumi 的 iOS 安装指南</a
+        >的准备、安装与排错思路，结合安大通的系统要求和 Widget
+        单独编写。工具行为以 <a
+          href="https://sideloadly.io/faq"
+          target="_blank"
+          rel="noopener noreferrer">Sideloadly 官方 FAQ</a
+        >为准；免费账号限制参见 <a
+          href="https://developer.apple.com/help/account/basics/about-your-developer-account"
+          target="_blank"
+          rel="noopener noreferrer">Apple 官方说明</a
+        >。最后核对：2026-10-16。
+      </p>
+    </article>
+    <aside class="ahutong-toc" aria-label="本页目录">
+      <p class="ahutong-eyebrow">On this page</p>{
+        sections.map(([id, label]) => <a href={`#${id}`}>{label}</a>)
+      }
+    </aside>
+  </div>
+</AhutongLayout>

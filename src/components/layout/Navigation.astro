@@ -1,12 +1,12 @@
 ---
+import { navigationSection } from "../../lib/navigationPath";
 const navItems = [
   { name: "首页", href: "/" },
+  { name: "安大通", href: "/projects/ahutong/" },
   { name: "关于", href: "/about/" },
 ];
 
-const normalizePath = (path: string) =>
-  path === "/" ? path : path.replace(/\/+$/, "");
-const currentPath = normalizePath(Astro.url.pathname);
+const currentPath = navigationSection(Astro.url.pathname);
 ---
 
 <nav
@@ -20,7 +20,7 @@ const currentPath = normalizePath(Astro.url.pathname);
   </span>
   {
     navItems.map((item) => {
-      const isActive = currentPath === item.href;
+      const isActive = currentPath === navigationSection(item.href);
 
       return (
         <a
@@ -31,7 +31,7 @@ const currentPath = normalizePath(Astro.url.pathname);
           data-route-path={item.href}
           data-astro-prefetch="viewport"
           class:list={[
-            "route-nav__link relative z-10 inline-flex min-h-11 items-center rounded-2xl px-2.5 text-sm text-foreground/60 transition-colors hover:text-foreground/85 sm:px-3 sm:text-base",
+            "route-nav__link relative z-10 inline-flex min-h-11 items-center whitespace-nowrap rounded-2xl px-2.5 text-sm text-foreground/60 transition-colors hover:text-foreground/85 sm:px-3 sm:text-base",
             "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-foreground/20",
           ]}
         >

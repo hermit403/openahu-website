@@ -1,0 +1,257 @@
+.ahutong-page {
+  width: min(100% - 2rem, 68rem);
+  margin: 2.5rem auto 5rem;
+}
+.ahutong-nav {
+  display: flex;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+  padding: 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 1.2rem;
+  background: color-mix(in srgb, var(--background) 65%, transparent);
+  margin-bottom: 3rem;
+}
+.ahutong-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.6rem 1rem;
+  border-radius: 0.85rem;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+.ahutong-nav a:hover,
+.ahutong-nav a[aria-current="page"] {
+  background: var(--secondary);
+  color: var(--foreground);
+}
+.ahutong-page a:focus-visible,
+.ahutong-nav a:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 4px;
+}
+.ahutong-eyebrow {
+  font: 500 0.75rem/1.5 var(--font-mono);
+  letter-spacing: 0.12em;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+}
+.ahutong-hero {
+  margin-bottom: 2.5rem;
+}
+.ahutong-hero h1 {
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  font-weight: 750;
+  line-height: 1.18;
+  letter-spacing: -0.04em;
+  margin: 1rem 0;
+  text-wrap: balance;
+}
+.ahutong-lead {
+  max-width: 43rem;
+  font-size: 1.075rem;
+  line-height: 1.85;
+  color: var(--muted-foreground);
+  text-wrap: pretty;
+}
+.ahutong-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+}
+.ahutong-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+.ahutong-panel {
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 1.5rem;
+  padding: clamp(1.25rem, 3vw, 2rem);
+  background: color-mix(in srgb, var(--background) 74%, transparent);
+}
+.ahutong-panel h2 {
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin: 0.7rem 0;
+  line-height: 1.45;
+}
+.ahutong-panel p {
+  color: var(--muted-foreground);
+  line-height: 1.85;
+}
+.ahutong-panel--feature {
+  background:
+    radial-gradient(
+      ellipse at 95% 0,
+      color-mix(in srgb, #8072db 12%, transparent),
+      transparent 75%
+    ),
+    color-mix(in srgb, var(--background) 75%, transparent);
+}
+.ahutong-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1.2rem 0;
+}
+.ahutong-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+.ahutong-badge--accent {
+  color: light-dark(#51409c, #c6bfff);
+  background: light-dark(#f1eefe, #29243d);
+  border-color: light-dark(#e1dbf8, #49405f);
+}
+.ahutong-reading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 14rem;
+  gap: 3rem;
+  align-items: start;
+}
+.ahutong-article {
+  min-width: 0;
+}
+.ahutong-article :is(h2, h3),
+.ahutong-release {
+  scroll-margin-top: 7rem;
+}
+.ahutong-article h2 {
+  margin-top: 2.5rem;
+}
+.ahutong-toc {
+  position: sticky;
+  top: 7rem;
+  border-left: 1px solid var(--border);
+  padding-left: 1rem;
+  font-size: 0.875rem;
+}
+.ahutong-toc a {
+  display: block;
+  padding: 0.55rem 0;
+  color: var(--muted-foreground);
+}
+.ahutong-toc a:hover {
+  color: var(--foreground);
+}
+.ahutong-note {
+  border-left: 3px solid color-mix(in srgb, #8072db 70%, var(--foreground));
+  padding: 0.9rem 1rem;
+  background: color-mix(in srgb, var(--secondary) 75%, transparent);
+  border-radius: 0 0.75rem 0.75rem 0;
+  line-height: 1.8;
+}
+.ahutong-steps {
+  display: grid;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+.ahutong-step {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  gap: 0.85rem;
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+}
+.ahutong-step > span {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--foreground);
+  color: var(--background);
+  font: 500 0.8rem var(--font-mono);
+}
+.ahutong-step h3 {
+  margin: 0.2rem 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 650;
+}
+.ahutong-step p {
+  color: var(--muted-foreground);
+  line-height: 1.8;
+}
+.ahutong-faq {
+  margin: 1rem 0;
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 0;
+}
+.ahutong-faq summary {
+  cursor: pointer;
+  font-weight: 600;
+  min-height: 44px;
+  padding: 0.4rem 0;
+}
+.ahutong-faq p {
+  margin: 0.5rem 0 1rem;
+}
+.ahutong-release {
+  padding: 1.8rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.ahutong-release h3 {
+  margin: 0.7rem 0;
+  font-size: 1.65rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+.ahutong-release ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+  color: var(--muted-foreground);
+  line-height: 1.85;
+}
+.ahutong-release li + li {
+  margin-top: 0.35rem;
+}
+.ahutong-source {
+  display: inline-flex;
+  margin-top: 1rem;
+  min-height: 44px;
+  align-items: center;
+  font-size: 0.8rem;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.ahutong-status {
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  line-height: 1.8;
+  color: var(--muted-foreground);
+}
+@media (max-width: 700px) {
+  .ahutong-page {
+    margin-top: 1.5rem;
+  }
+  .ahutong-grid,
+  .ahutong-reading {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ahutong-toc {
+    position: static;
+    order: -1;
+  }
+  .ahutong-nav {
+    margin-bottom: 2rem;
+  }
+  .ahutong-nav a {
+    padding-inline: 0.7rem;
+    font-size: 0.8rem;
+  }
+}
+
+.ahutong-page section[id] {
+  scroll-margin-top: 7rem;
+}

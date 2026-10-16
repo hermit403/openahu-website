@@ -62,6 +62,9 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Verify source and production build
+        env:
+          PUBLIC_IOS_WAITLIST_FORM_URL: ${{ vars.PUBLIC_IOS_WAITLIST_FORM_URL }}
+          PUBLIC_AHUTONG_IOS_IPA_URL: ${{ vars.PUBLIC_AHUTONG_IOS_IPA_URL }}
         run: pnpm verify
 
       - name: Configure SSH
@@ -146,6 +149,10 @@ jobs:
 
           test -f "$release_path/index.html"
           test -f "$release_path/about/index.html"
+          test -f "$release_path/projects/ahutong/index.html"
+          test -f "$release_path/projects/ahutong/ios/index.html"
+          test -f "$release_path/projects/ahutong/changelog/index.html"
+          test -f "$release_path/waitlist/index.html"
 
           ln -sfn "$release_path" "$next_link"
           mv -Tf "$next_link" "$deploy_path"
@@ -155,7 +162,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for route in / /about/; do
+          for route in / /about/ /projects/ahutong/ /projects/ahutong/ios/ /projects/ahutong/changelog/ /waitlist/; do
             curl \
               --fail \
               --silent \

@@ -1,0 +1,24 @@
+---
+import Layout from "./Layout.astro";
+import AhutongNav from "../components/ahutong/AhutongNav.astro";
+import "../styles/ahutong.css";
+interface Props {
+  title: string;
+  description: string;
+  eyebrow: string;
+}
+const { title, description, eyebrow } = Astro.props;
+---
+
+<Layout title={`${title} - 安大通 · OpenAHU`} description={description}>
+  <div class="ahutong-page">
+    <AhutongNav />
+    <header class="ahutong-hero">
+      <p class="ahutong-eyebrow">{eyebrow}</p>
+      <h1>{title}</h1>
+      <p class="ahutong-lead">{description}</p>
+      <slot name="actions" />
+    </header>
+    <slot />
+  </div>
+</Layout>

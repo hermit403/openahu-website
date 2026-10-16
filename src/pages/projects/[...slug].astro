@@ -4,6 +4,7 @@ import Layout from "../../layouts/Layout.astro";
 import Button from "../../components/ui/Button.astro";
 import { ArrowLeftIcon } from "@radix-ui/react-icons";
 import TechStack from "../../components/common/TechStack.astro";
+import AhutongAccess from "../../components/ahutong/AhutongAccess.astro";
 
 export async function getStaticPaths() {
   const projects = await getCollection("projects");
@@ -16,6 +17,7 @@ export async function getStaticPaths() {
 const { project } = Astro.props;
 const { title, desc, downloadUrl, techstack, screenshots, links } =
   project.data;
+const isAhutong = (project.data.slug || project.id) === "ahutong";
 const { Content } = await render(project);
 const normalizedScreenshots = screenshots?.map((screenshot, index) =>
   typeof screenshot === "string"
@@ -49,7 +51,7 @@ const normalizedScreenshots = screenshots?.map((screenshot, index) =>
             downloadUrl !== undefined &&
               (downloadUrl ? (
                 <Button href={downloadUrl} target="_blank" rel="noreferrer">
-                  下载
+                  {isAhutong ? "下载 Android 版" : "下载"}
                 </Button>
               ) : (
                 <Button disabled>暂无下载链接</Button>
@@ -69,6 +71,8 @@ const normalizedScreenshots = screenshots?.map((screenshot, index) =>
           }
         </div>
       </div>
+
+      {isAhutong && <AhutongAccess />}
 
       {
         normalizedScreenshots && normalizedScreenshots.length > 0 && (

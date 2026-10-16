@@ -1,0 +1,122 @@
+---
+import AhutongLayout from "../layouts/AhutongLayout.astro";
+import Button from "../components/ui/Button.astro";
+import { ahutong } from "../config/ahutong";
+const steps = [
+  { title: "填写体验意向", text: "留下方便联系的方式，以及你希望体验的应用。" },
+  { title: "等待测试邀请", text: "我们会按测试安排分批联系申请者。" },
+  {
+    title: "登记设备并安装",
+    text: "收到邀请后，按说明完成设备登记，再打开安装页面。",
+  },
+];
+---
+
+<AhutongLayout
+  title="在 iPhone 上，遇见安大通。"
+  description="加入 iOS 体验计划。把课表、校园卡和校园生活，装进随身的设备。"
+  eyebrow="OpenAHU · iOS Waitlist"
+>
+  <div class="ahutong-grid">
+    <section
+      class="ahutong-panel ahutong-panel--feature"
+      aria-labelledby="waitlist-heading"
+    >
+      <span class="ahutong-badge ahutong-badge--accent"
+        >{ahutong.waitlistFormUrl ? "申请已开放" : "申请即将开放"}</span
+      >
+      <h2 id="waitlist-heading">少一点安装折腾，多一点校园便利。</h2>
+      <p>
+        团队签名体验采用申请制。安装方式、设备登记要求和有效期，会随测试邀请一并说明。
+      </p>
+      <div class="ahutong-meta">
+        <span class="ahutong-badge">iPhone / iPad</span><span
+          class="ahutong-badge">iOS 17 及以上</span
+        ><span class="ahutong-badge">分批邀请</span>
+      </div>
+      <div class="ahutong-actions">
+        {
+          ahutong.waitlistFormUrl ? (
+            <Button
+              href={ahutong.waitlistFormUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-describedby="waitlist-status"
+            >
+              填写体验申请 ↗
+            </Button>
+          ) : (
+            <Button disabled aria-describedby="waitlist-status">
+              申请入口即将开放
+            </Button>
+          )
+        }
+        <Button variant="outline" href="/projects/ahutong/ios/"
+          >先了解自签安装</Button
+        >
+      </div>
+      <p class="ahutong-status" id="waitlist-status">
+        {
+          ahutong.waitlistFormUrl
+            ? "将打开独立的收集表。提交意向后，请留意你在表单中填写的联系方式。"
+            : "收集表开放后，你可以从这里填写申请。现在也可以先阅读安装教程和版本更新。"
+        }
+      </p>
+    </section>
+    <section class="ahutong-panel" aria-labelledby="next-heading">
+      <p class="ahutong-eyebrow">What happens next</p>
+      <h2 id="next-heading">从申请，到第一次打开。</h2>
+      <ol class="ahutong-steps">
+        {
+          steps.map((step, index) => (
+            <li class="ahutong-step">
+              <>
+                <span aria-hidden="true">{index + 1}</span>
+                <div>
+                  <>
+                    <h3>{step.title}</h3>
+                    <p>{step.text}</p>
+                  </>
+                </div>
+              </>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+  </div>
+  <div class="ahutong-reading" style="margin-top: 2rem">
+    <section
+      class="markdown-content ahutong-article"
+      aria-labelledby="questions"
+    >
+      <h2 id="questions">你可能还想了解</h2>
+      <details class="ahutong-faq">
+        <summary>填写后就能立即安装吗？</summary><p>
+          提交的是体验意向。我们会根据测试安排和设备名额发出邀请，安装入口以邀请通知为准。
+        </p>
+      </details>
+      <details class="ahutong-faq">
+        <summary>需要把 Apple 账号交给团队吗？</summary><p>
+          团队签名体验需要登记获准设备，不需要你提供 Apple
+          账号密码。申请表中也请勿填写校园账号密码或支付信息。
+        </p>
+      </details>
+      <details class="ahutong-faq">
+        <summary>“一年签”能使用多久？</summary><p>
+          请以收到的安装包标注的实际到期日为准。团队签名有效期取决于证书和描述文件，后续续签安排会随邀请说明。
+        </p>
+      </details>
+      <details class="ahutong-faq">
+        <summary>已经会自签，还需要申请吗？</summary><p>
+          如果已经获取安大通
+          IPA，可以直接按自签教程安装。免费账号需要定期续签；waitlist
+          面向希望参加团队签名体验的用户。
+        </p>
+      </details>
+      <p>
+        <a href="/projects/ahutong/changelog/">看看安大通最近更新了什么 →</a>
+      </p>
+    </section>
+  </div>
+</AhutongLayout>

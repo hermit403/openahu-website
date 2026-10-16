@@ -1,0 +1,86 @@
+---
+import AhutongLayout from "../../../layouts/AhutongLayout.astro";
+import Button from "../../../components/ui/Button.astro";
+import { androidReleases, iosPreview } from "../../../data/ahutong-releases";
+---
+
+<AhutongLayout
+  title="最近，做了这些改进。"
+  description="按平台查看安大通的近期更新。Android 记录整理自对应版本分支；iOS 预览改动单独列出，安装包以实际提供的版本为准。"
+  eyebrow="AHUTong · Changelog"
+>
+  <div slot="actions" class="ahutong-actions">
+    <Button variant="outline" href="#android">Android</Button><Button
+      variant="outline"
+      href="#ios">iOS 预览</Button
+    ><Button variant="ghost" href="/projects/ahutong/#history"
+      >更早版本 ↗</Button
+    >
+  </div>
+  <div class="ahutong-reading">
+    <div>
+      <section id="android" aria-labelledby="android-heading">
+        <p class="ahutong-eyebrow" id="android-heading">Android · 近期版本</p>
+        {
+          androidReleases.map((release) => (
+            <article class="ahutong-release" id={`v${release.version}`}>
+              <div class="ahutong-meta">
+                <>
+                  <span class="ahutong-badge">Android</span>
+                  <time class="ahutong-badge" datetime={release.date}>
+                    {release.date}
+                  </time>
+                </>
+              </div>
+              <h3>v{release.version}</h3>
+              <p class="mb-4 font-medium">{release.summary}</p>
+              <ul>
+                {release.changes.map((change) => (
+                  <li>{change}</li>
+                ))}
+              </ul>
+              <a
+                class="ahutong-source"
+                href={release.source}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                查看版本依据 ↗
+              </a>
+            </article>
+          ))
+        }
+      </section>
+      <section id="ios" aria-labelledby="ios-heading" style="margin-top: 3rem">
+        <p class="ahutong-eyebrow" id="ios-heading">iOS · 修复预览</p>
+        <article class="ahutong-release" id="ios-preview">
+          <div class="ahutong-meta">
+            <span class="ahutong-badge ahutong-badge--accent"
+              >修复预览 · 待合并</span
+            ><time class="ahutong-badge" datetime={iosPreview.date}
+              >{iosPreview.date}</time
+            >
+          </div>
+          <h3>v{iosPreview.version} · 弱网与课表优化</h3>
+          <ul>{iosPreview.changes.map((change) => <li>{change}</li>)}</ul>
+          <a
+            class="ahutong-source"
+            href={iosPreview.source}
+            target="_blank"
+            rel="noopener noreferrer">查看修复 PR ↗</a
+          >
+          <p class="ahutong-status">
+            这组改动已完成本机测试和无签名构建，仍需授权账号与物理设备验收，当前尚未合并到主线。
+          </p>
+        </article>
+      </section>
+    </div>
+    <aside class="ahutong-toc" aria-label="版本目录">
+      <p class="ahutong-eyebrow">Versions</p>{
+        androidReleases.map((release) => (
+          <a href={`#v${release.version}`}>Android {release.version}</a>
+        ))
+      }<a href="#ios-preview">iOS 1.0.0 预览</a>
+    </aside>
+  </div>
+</AhutongLayout>

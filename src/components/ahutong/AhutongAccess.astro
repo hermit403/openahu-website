@@ -1,0 +1,34 @@
+---
+import AhutongNav from "./AhutongNav.astro";
+import Button from "../ui/Button.astro";
+import "../../styles/ahutong.css";
+---
+
+<section aria-label="安大通安装与体验">
+  <AhutongNav />
+  <div class="ahutong-grid">
+    <div class="ahutong-panel">
+      <p class="ahutong-eyebrow">iOS · Self-sign</p>
+      <h2>用自己的账号，安装安大通</h2>
+      <p>准备电脑、数据线与 IPA，跟随 Sideloadly 教程完成安装和后续续签。</p>
+      <div class="ahutong-actions">
+        <Button variant="outline" href="/projects/ahutong/ios/"
+          >查看自签教程 →</Button
+        >
+      </div>
+    </div>
+    <div class="ahutong-panel ahutong-panel--feature">
+      <p class="ahutong-eyebrow">iOS · Waitlist</p>
+      <h2>想让安装更简单？</h2>
+      <p>
+        关注团队签名体验计划。按测试批次邀请，收到邀请后完成设备登记与安装。
+      </p>
+      <div class="ahutong-actions">
+        <Button href="/waitlist/">了解体验申请 →</Button>
+      </div>
+    </div>
+  </div>
+  <a class="ahutong-source" href="/projects/ahutong/changelog/"
+    >查看近期版本更新 →</a
+  >
+</section>

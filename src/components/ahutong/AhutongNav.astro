@@ -1,0 +1,22 @@
+---
+const items = [
+  { label: "项目介绍", href: "/projects/ahutong/" },
+  { label: "iOS 自签教程", href: "/projects/ahutong/ios/" },
+  { label: "体验申请", href: "/waitlist/" },
+  { label: "更新日志", href: "/projects/ahutong/changelog/" },
+];
+const current = Astro.url.pathname.replace(/\/+$/, "");
+---
+
+<nav class="ahutong-nav" aria-label="安大通导航">
+  {
+    items.map(({ label, href }) => (
+      <a
+        href={href}
+        aria-current={current === href.replace(/\/+$/, "") ? "page" : undefined}
+      >
+        {label}
+      </a>
+    ))
+  }
+</nav>
